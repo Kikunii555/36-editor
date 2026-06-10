@@ -1,0 +1,33 @@
+/* iPadのタッチ操作における不要な選択やハイライトを防止 */
+button,
+.btn-touch,
+.list-item-touch {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+/* テキストエリアのカーソル（キャレット）の色をブランドカラーに */
+textarea {
+    caret-color: #3b82f6;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+/* スクロールバーのカスタマイズ */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
