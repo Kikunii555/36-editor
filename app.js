@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const emptyState = document.getElementById('empty-state');
 
     const backBtn = document.getElementById('back-btn');
-    const saveBtn = document.getElementById('save-btn');
     const docTitleInput = document.getElementById('doc-title-input');
     const editor = document.getElementById('editor');
     const clearMainBtn = document.getElementById('clear-main-btn');
@@ -59,6 +58,28 @@ document.addEventListener('DOMContentLoaded', () => {
         teal:   { card: "bg-teal-50 border-teal-200 hover:border-teal-400" },
         slate:  { card: "bg-slate-100 border-slate-300 hover:border-slate-500" }
     };
+
+    // --- デフォルト設定値 ---
+    const DEFAULT_CHAR_WEIGHTS = {
+        ascii:       0.5,  // 半角英数字・記号
+        hankakuKana: 0.5,  // 半角カタカナ
+        katakana:    0.7,  // 全角カタカナ
+        fullwidth:   1.0,  // 漢字・ひらがな・その他
+        lineWidth:   36    // 1行の最大文字幅
+    };
+
+    // localStorageから設定を読み込む
+    function loadCharWeights() {
+        const saved = localStorage.getItem('editor_char_weights');
+        if (saved) {
+            try {
+                return { ...DEFAULT_CHAR_WEIGHTS, ...JSON.parse(saved) };
+            } catch (e) {}
+        }
+        return { ...DEFAULT_CHAR_WEIGHTS };
+    }
+
+    let CHAR_WEIGHTS = loadCharWeights();
 
     // --- 状態管理 (メモリ内 & ローカルストレージ自動保存) ---
     let texts = [];
@@ -126,6 +147,51 @@ document.addEventListener('DOMContentLoaded', () => {
     const AUTO_BREAK_MARKER = '\u200B\n';
     const KINSOKU_CHARS = `、。，．・？！?!゛゜ー〜～）]｝」』】〉》〕»"'ぁぃぅぇぉっゃゅょゎヵヶァィゥェォッャュョヮヵヶ`;
 
+    // --- 共通保存処理（戻るボタン・自動保存共用） ---
+    function saveCurrentDoc() {
+        const rawText = editor.value;
+        const textWithoutAutoLineBreaks = rawText.replace(new RegExp(AUTO_BREAK_MARKER, 'g'), '');
+        if (!textWithoutAutoLineBreaks.trim()) return false; // 空なら保存しない
+
+        let title = docTitleInput.value.trim();
+        if (!title) {
+            const cleanText = textWithoutAutoLineBreaks.replace(/\n/g, ' ');
+            title = cleanText.substring(0, 15) || '無題のドキュメント';
+            if (cleanText.length > 15) title += '...';
+        }
+
+        const rCount = parseFloat(rawCount.textContent);
+        const cCount = parseFloat(convertedCount.textContent);
+        const calculatedLineCount = rawText ? rawText.split('\n').length : 0;
+
+        if (activeDocId) {
+            const index = texts.findIndex(t => t.id === activeDocId);
+            if (index !== -1) {
+                texts[index] = {
+                    ...texts[index],
+                    title, content: rawText,
+                    rawCount: rCount, convertedCount: cCount,
+                    lineCount: calculatedLineCount,
+                    updatedAt: getNowFormatted()
+                };
+            }
+        } else {
+            const newId = 'doc-' + Date.now();
+            texts.unshift({
+                id: newId, title, content: rawText,
+                rawCount: rCount, convertedCount: cCount,
+                lineCount: calculatedLineCount,
+                color: "white",
+                updatedAt: getNowFormatted()
+            });
+            activeDocId = newId;
+        }
+
+        saveTextsToStorage();
+        localStorage.removeItem('editor_draft');
+        return true;
+    }
+
     // --- 自動保存インジケータ ---
     const autosaveIndicator = document.getElementById('autosave-indicator');
     let autosaveHideTimer = null;
@@ -143,55 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- 自動保存ロジック（デバウンス付き 1.5秒） ---
     function scheduleAutoSave() {
         if (autoSaveTimer) clearTimeout(autoSaveTimer);
-        autoSaveTimer = setTimeout(() => {
-            performAutoSave();
-        }, 1500);
-    }
-
-    function performAutoSave() {
-        const rawText = editor.value;
-        const textWithoutAutoLineBreaks = rawText.replace(new RegExp(AUTO_BREAK_MARKER, 'g'), '');
-        if (!textWithoutAutoLineBreaks.trim()) return;
-
-        let title = docTitleInput.value.trim();
-        if (!title) {
-            const cleanText = textWithoutAutoLineBreaks.replace(/\n/g, ' ');
-            title = cleanText.substring(0, 15) || '無題のドキュメント';
-            if (cleanText.length > 15) title += '...';
-        }
-
-        const rCount = parseFloat(rawCount.textContent);
-        const cCount = parseFloat(convertedCount.textContent);
-        const calculatedLineCount = rawText ? rawText.split('\n').length : 0;
-
-        if (activeDocId) {
-            // 既存ドキュメント：上書き保存
-            const index = texts.findIndex(t => t.id === activeDocId);
-            if (index !== -1) {
-                texts[index] = {
-                    ...texts[index],
-                    title: title,
-                    content: rawText,
-                    rawCount: rCount,
-                    convertedCount: cCount,
-                    lineCount: calculatedLineCount,
-                    updatedAt: getNowFormatted()
-                };
-                saveTextsToStorage();
-                showAutosaveIndicator();
-            }
-        } else {
-            // 新規ドキュメント：下書きとして保存
-            localStorage.setItem('editor_draft', JSON.stringify({
-                title: title,
-                content: rawText,
-                rawCount: rCount,
-                convertedCount: cCount,
-                lineCount: calculatedLineCount,
-                savedAt: getNowFormatted()
-            }));
-            showAutosaveIndicator();
-        }
+        autoSaveTimer = setTimeout(saveCurrentDoc, 1500);
     }
 
     // --- 下書き復元 ---
@@ -249,14 +267,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 文字ウェイト評価 (半角0.5, 全角カタカナ0.7, その他1.0) ---
+    // --- 文字ウェイト評価 (設定値を参照) ---
     function getCharWidth(char) {
         if (char === '\u200B' || char === '\n' || char === '\r') return 0;
         const code = char.charCodeAt(0);
-        if (code >= 0x0020 && code <= 0x007E) return 0.5;
-        if (code >= 0xFF61 && code <= 0xFF9F) return 0.5;
-        if ((code >= 0x30A0 && code <= 0x30FF) || (code >= 0x31F0 && code <= 0x31FF)) return 0.7;
-        return 1.0;
+        if (code >= 0x0020 && code <= 0x007E) return CHAR_WEIGHTS.ascii;
+        if (code >= 0xFF61 && code <= 0xFF9F) return CHAR_WEIGHTS.hankakuKana;
+        if ((code >= 0x30A0 && code <= 0x30FF) || (code >= 0x31F0 && code <= 0x31FF)) return CHAR_WEIGHTS.katakana;
+        return CHAR_WEIGHTS.fullwidth;
     }
 
     function getStringWidth(str) {
@@ -601,7 +619,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const oldSelectionStart = editor.selectionStart;
         const paragraphs = textWithoutAutoLineBreaks.split('\n');
-        const limit = 36;
+        const limit = CHAR_WEIGHTS.lineWidth;
 
         const convertedParagraphs = paragraphs.map(paragraph => {
             let chunked = [];
@@ -721,62 +739,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${y}/${m}/${d} ${h}:${min}`;
     }
 
-    // --- ドキュメント保存機能 ---
-    saveBtn.addEventListener('click', () => {
-        const rawText = editor.value;
-        const textWithoutAutoLineBreaks = rawText.replace(new RegExp(AUTO_BREAK_MARKER, 'g'), '');
-
-        if (!textWithoutAutoLineBreaks.trim()) {
-            showToast('保存するテキストがありません');
-            return;
-        }
-
-        let title = docTitleInput.value.trim();
-        if (!title) {
-            const cleanText = textWithoutAutoLineBreaks.replace(/\n/g, ' ');
-            title = cleanText.substring(0, 15) || '無題のドキュメント';
-            if (cleanText.length > 15) title += '...';
-        }
-
-        const rCount = parseFloat(rawCount.textContent);
-        const cCount = parseFloat(convertedCount.textContent);
-        const calculatedLineCount = rawText ? rawText.split('\n').length : 0;
-
-        if (activeDocId) {
-            // 更新処理
-            const index = texts.findIndex(t => t.id === activeDocId);
-            if (index !== -1) {
-                texts[index] = {
-                    ...texts[index],
-                    title: title,
-                    content: rawText,
-                    rawCount: rCount,
-                    convertedCount: cCount,
-                    lineCount: calculatedLineCount,
-                    updatedAt: getNowFormatted()
-                };
-            }
-        } else {
-            // 新規追加
-            const newId = 'doc-' + Date.now();
-            texts.unshift({
-                id: newId,
-                title: title,
-                content: rawText,
-                rawCount: rCount,
-                convertedCount: cCount,
-                lineCount: calculatedLineCount,
-                color: "white",
-                updatedAt: getNowFormatted()
-            });
-        }
-
-        saveTextsToStorage();
-        // 明示的保存時に下書きを削除
-        localStorage.removeItem('editor_draft');
-        showToast('保存しました');
-        switchTo('home');
-    });
+    // --- ドキュメント保存（指定なし・戻るボタンで呼び出す） ---
 
     // --- 新規ドキュメント開始 ---
     newDocBtn.addEventListener('click', () => {
@@ -791,13 +754,10 @@ document.addEventListener('DOMContentLoaded', () => {
         restoreDraftIfExists();
     });
 
-    // --- 一覧に戻る ---
+    // --- 一覧に戻る（自動保存して戻る） ---
     backBtn.addEventListener('click', () => {
-        // 新規ドキュメントで未保存の場合、下書きを残す（自動保存済みのため消さない）
-        // 既存ドキュメントの場合は自動保存済みなので下書きは不要
-        if (activeDocId) {
-            localStorage.removeItem('editor_draft');
-        }
+        if (autoSaveTimer) clearTimeout(autoSaveTimer);
+        saveCurrentDoc();
         switchTo('home');
     });
 
@@ -963,6 +923,81 @@ document.addEventListener('DOMContentLoaded', () => {
             return escape[match];
         });
     }
+
+    // ==================== 設定モーダル ====================
+    const settingsModal   = document.getElementById('settings-modal');
+    const settingsBtn     = document.getElementById('settings-btn');
+    const settingsCloseBtn= document.getElementById('settings-close-btn');
+    const settingsSaveBtn = document.getElementById('settings-save-btn');
+    const settingsResetBtn= document.getElementById('settings-reset-btn');
+
+    const inputLineWidth    = document.getElementById('setting-line-width');
+    const inputAscii        = document.getElementById('setting-weight-ascii');
+    const inputHankakuKana  = document.getElementById('setting-weight-hankaku-kana');
+    const inputKatakana     = document.getElementById('setting-weight-katakana');
+    const inputFullwidth    = document.getElementById('setting-weight-fullwidth');
+
+    // モーダルを開く（現在の設定値をフォームに反映）
+    function openSettingsModal() {
+        inputLineWidth.value   = CHAR_WEIGHTS.lineWidth;
+        inputAscii.value       = CHAR_WEIGHTS.ascii;
+        inputHankakuKana.value = CHAR_WEIGHTS.hankakuKana;
+        inputKatakana.value    = CHAR_WEIGHTS.katakana;
+        inputFullwidth.value   = CHAR_WEIGHTS.fullwidth;
+
+        settingsModal.classList.remove('hidden');
+        settingsModal.classList.add('flex');
+    }
+
+    // モーダルを閉じる
+    function closeSettingsModal() {
+        settingsModal.classList.add('hidden');
+        settingsModal.classList.remove('flex');
+    }
+
+    settingsBtn.addEventListener('click', openSettingsModal);
+    settingsCloseBtn.addEventListener('click', closeSettingsModal);
+    settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) closeSettingsModal();
+    });
+
+    // 設定を保存して適用
+    settingsSaveBtn.addEventListener('click', () => {
+        const lw = parseFloat(inputLineWidth.value);
+        const wa = parseFloat(inputAscii.value);
+        const wh = parseFloat(inputHankakuKana.value);
+        const wk = parseFloat(inputKatakana.value);
+        const wf = parseFloat(inputFullwidth.value);
+
+        if ([lw, wa, wh, wk, wf].some(v => isNaN(v) || v <= 0)) {
+            showToast('正しい数値を入力してください');
+            return;
+        }
+
+        CHAR_WEIGHTS = { lineWidth: lw, ascii: wa, hankakuKana: wh, katakana: wk, fullwidth: wf };
+        localStorage.setItem('editor_char_weights', JSON.stringify(CHAR_WEIGHTS));
+
+        closeSettingsModal();
+        showToast('設定を適用しました');
+
+        // エディタが開いていれば即時再処理
+        if (!editorScreen.classList.contains('hidden')) {
+            processText();
+        }
+    });
+
+    // デフォルトに戻す
+    settingsResetBtn.addEventListener('click', () => {
+        CHAR_WEIGHTS = { ...DEFAULT_CHAR_WEIGHTS };
+        localStorage.removeItem('editor_char_weights');
+
+        closeSettingsModal();
+        showToast('デフォルト設定に戻しました');
+
+        if (!editorScreen.classList.contains('hidden')) {
+            processText();
+        }
+    });
 
     // 初期化
     loadDataFromStorage();

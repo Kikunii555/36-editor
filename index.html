@@ -11,6 +11,12 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="36改行エディタ">
 
+    <!-- PWAアイコン設定 -->
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="icon-152.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="icon-120.png">
+    <link rel="icon" type="image/png" sizes="180x180" href="icon-180.png">
+
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -51,9 +57,17 @@
                 <p id="sub-title" class="text-xs text-slate-500">作成ドキュメント管理</p>
             </div>
         </div>
-        <div class="flex items-center space-x-2 text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg font-medium">
-            <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
-            リアルタイム処理中
+        <div class="flex items-center gap-3">
+            <div class="flex items-center space-x-2 text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg font-medium">
+                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
+                リアルタイム処理中
+            </div>
+            <!-- 設定ボタン -->
+            <button id="settings-btn"
+                class="h-9 w-9 flex items-center justify-center text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all border border-slate-200 hover:border-brand-200"
+                title="文字ウェイト・行幅の設定">
+                <i class="fa-solid fa-gear text-base"></i>
+            </button>
         </div>
     </header>
 
@@ -175,7 +189,7 @@
         <div class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between gap-4 shrink-0">
             <!-- 戻るボタン -->
             <button id="back-btn"
-                class="h-10 hover:bg-slate-100 text-slate-600 px-3.5 rounded-lg font-bold text-sm flex items-center gap-2 transition-all btn-touch">
+                class="h-10 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white px-4 rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all btn-touch">
                 <i class="fa-solid fa-chevron-left"></i>
                 一覧に戻る
             </button>
@@ -187,19 +201,6 @@
                     placeholder="無題のドキュメント">
             </div>
 
-            <!-- 自動保存インジケータ + 保存ボタン -->
-            <div class="flex items-center gap-2 shrink-0">
-                <div id="autosave-indicator"
-                    class="hidden items-center gap-1.5 text-xs text-emerald-600 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg font-medium transition-all duration-500">
-                    <i class="fa-solid fa-circle-check text-emerald-500"></i>
-                    自動保存済み
-                </div>
-                <button id="save-btn"
-                    class="h-10 bg-emerald-600 hover:bg-emerald-700 text-white px-5 rounded-lg font-bold text-sm flex items-center gap-1.5 shadow-sm transition-all btn-touch">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    保存
-                </button>
-            </div>
         </div>
 
         <!-- 執筆エリア（全体スクロール可能） -->
@@ -348,6 +349,104 @@
         class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-sm py-3 px-5 rounded-full shadow-xl items-center gap-2.5 transition-all duration-300 z-50 animate-bounce">
         <i class="fa-solid fa-circle-check text-emerald-400"></i>
         <span id="toast-message">メッセージ</span>
+    </div>
+
+    <!-- ==================== 設定モーダル ==================== -->
+    <div id="settings-modal"
+        class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
+            <!-- ヘッダー -->
+            <div class="flex items-center justify-between mb-5">
+                <div class="flex items-center gap-2.5">
+                    <div class="bg-brand-500 text-white p-2 rounded-lg">
+                        <i class="fa-solid fa-gear text-sm"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-slate-900">文字ウェイト・行幅の設定</h3>
+                </div>
+                <button id="settings-close-btn" class="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- 行幅 -->
+            <div class="mb-5 p-4 bg-brand-50 rounded-xl border border-brand-100">
+                <label class="block text-xs font-bold text-brand-700 mb-2 uppercase tracking-wide">1行の最大文字幅</label>
+                <div class="flex items-center gap-3">
+                    <input type="number" id="setting-line-width" min="10" max="120" step="1"
+                        class="w-24 text-center text-lg font-extrabold text-brand-700 border-2 border-brand-200 rounded-xl py-2 px-3 focus:border-brand-500 outline-none transition-all bg-white">
+                    <span class="text-sm text-slate-500">文字分で自動改行</span>
+                </div>
+            </div>
+
+            <!-- 文字ウェイト設定 -->
+            <div class="space-y-3 mb-5">
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-wide">文字の換算ウェイト</p>
+
+                <!-- 半角英数字 -->
+                <div class="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">半角英数字・記号</p>
+                        <p class="text-xs text-slate-400">例: a, 1, !, ABC</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="setting-weight-ascii" min="0.1" max="2" step="0.1"
+                            class="w-20 text-center font-bold text-slate-700 border-2 border-slate-200 rounded-lg py-1.5 px-2 focus:border-brand-500 outline-none transition-all text-sm bg-white">
+                        <span class="text-xs text-slate-400">文字分</span>
+                    </div>
+                </div>
+
+                <!-- 半角カタカナ -->
+                <div class="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">半角カタカナ</p>
+                        <p class="text-xs text-slate-400">例: ｱｲｳｴｵ</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="setting-weight-hankaku-kana" min="0.1" max="2" step="0.1"
+                            class="w-20 text-center font-bold text-slate-700 border-2 border-slate-200 rounded-lg py-1.5 px-2 focus:border-brand-500 outline-none transition-all text-sm bg-white">
+                        <span class="text-xs text-slate-400">文字分</span>
+                    </div>
+                </div>
+
+                <!-- 全角カタカナ -->
+                <div class="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">全角カタカナ</p>
+                        <p class="text-xs text-slate-400">例: アイウエオ</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="setting-weight-katakana" min="0.1" max="2" step="0.1"
+                            class="w-20 text-center font-bold text-slate-700 border-2 border-slate-200 rounded-lg py-1.5 px-2 focus:border-brand-500 outline-none transition-all text-sm bg-white">
+                        <span class="text-xs text-slate-400">文字分</span>
+                    </div>
+                </div>
+
+                <!-- 全角文字（漢字・ひらがな） -->
+                <div class="flex items-center justify-between bg-slate-50 rounded-xl px-4 py-3 border border-slate-200">
+                    <div>
+                        <p class="text-sm font-semibold text-slate-800">漢字・ひらがな・その他</p>
+                        <p class="text-xs text-slate-400">例: 漢字、あいう、。「」</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input type="number" id="setting-weight-fullwidth" min="0.1" max="2" step="0.1"
+                            class="w-20 text-center font-bold text-slate-700 border-2 border-slate-200 rounded-lg py-1.5 px-2 focus:border-brand-500 outline-none transition-all text-sm bg-white">
+                        <span class="text-xs text-slate-400">文字分</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ボタン -->
+            <div class="flex gap-2">
+                <button id="settings-reset-btn"
+                    class="flex-1 h-11 bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-600 font-bold rounded-xl text-sm transition-all">
+                    <i class="fa-solid fa-rotate-left mr-1"></i>デフォルトに戻す
+                </button>
+                <button id="settings-save-btn"
+                    class="flex-1 h-11 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white font-bold rounded-xl text-sm transition-all shadow-sm">
+                    <i class="fa-solid fa-check mr-1"></i>適用
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- ==================== アプリケーション・ロジック ==================== -->
