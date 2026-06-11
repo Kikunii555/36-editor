@@ -258,7 +258,7 @@
                             <span id="preview-char-count" class="font-bold">0</span> 文字
                         </span>
                     </div>
-                    <p id="preview-text" class="text-lg sm:text-xl font-bold text-slate-800 font-mono leading-relaxed select-all break-all"></p>
+                    <p id="preview-text" class="text-sm sm:text-base font-bold text-slate-800 font-mono leading-relaxed select-all break-all"></p>
                 </div>
 
                 <!-- 3列カウンター表示 -->
@@ -286,53 +286,7 @@
                 </div>
             </div>
 
-            <!-- エディタ画面の下部見出しカウンターリスト -->
-            <div
-                class="bg-white rounded-2xl border border-slate-200 p-5 md:p-6 shadow-sm flex flex-col relative shrink-0">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-1">
-                    <div class="flex items-center space-x-2.5">
-                        <span class="w-3 h-3 rounded-full bg-amber-500 shadow-lg shadow-amber-500/20"></span>
-                        <h2 class="font-bold text-slate-900 text-base tracking-tight flex items-center gap-2">
-                            ニュース見出し・参考用リスト（執筆参照用）
-                            <span id="headline-count-badge-editor"
-                                class="ml-1 inline-flex items-center justify-center bg-amber-100 text-amber-700 text-xs font-extrabold px-2 py-0.5 rounded-full border border-amber-200">0件</span>
-                        </h2>
-                    </div>
 
-                    <!-- リアルタイム入力中・編集中文字数カウンター (エディタ画面用) -->
-                    <div id="headline-counter-editor"
-                        class="hidden text-xs font-semibold px-3 py-1.5 rounded-xl animate-in fade-in slide-in-from-right-1 duration-150 shadow-sm">
-                        <i class="fa-regular fa-keyboard mr-1 animate-pulse"></i>
-                        入力中：<span id="headline-input-count-editor" class="font-bold text-sm">0</span> 文字
-                    </div>
-                </div>
-
-                <!-- クイック入力欄（エディタ画面側） -->
-                <div class="flex gap-2 mb-4">
-                    <textarea id="headline-input-editor" rows="1"
-                        class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 outline-none text-sm transition-all placeholder:text-slate-400 resize-none h-[46px] overflow-y-auto leading-normal"
-                        placeholder="複数行をペーストすると自動で1行ずつ分解して追加されます"></textarea>
-
-                    <!-- 編集キャンセルボタン（エディタ用） -->
-                    <button id="headline-cancel-btn-editor"
-                        class="hidden bg-slate-200 hover:bg-slate-300 active:scale-[0.98] text-slate-700 font-bold text-sm px-4 rounded-xl flex items-center gap-1.5 transition-all btn-touch whitespace-nowrap h-[46px]">
-                        キャンセル
-                    </button>
-
-                    <button id="headline-add-btn-editor"
-                        class="bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold text-sm px-5 rounded-xl flex items-center gap-1.5 transition-all btn-touch shadow-md shadow-amber-500/10 whitespace-nowrap h-[46px]">
-                        <i class="fa-solid fa-plus" id="headline-btn-icon-editor"></i> <span
-                            id="headline-btn-text-editor">追加</span>
-                    </button>
-                </div>
-
-                <!-- 隙間のスペースを排除し、外枠と内側の線だけで連結させた1カラムリスト構造 -->
-                <div class="border border-slate-200 rounded-xl overflow-hidden divide-y divide-slate-200 shadow-inner">
-                    <div id="headlines-list-editor" class="flex flex-col bg-white">
-                        <!-- JavaScriptで自動同期追加 -->
-                    </div>
-                </div>
-            </div>
 
         </main>
 

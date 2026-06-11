@@ -27,11 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const headlineCancelBtnHome = document.getElementById('headline-cancel-btn-home');
     const headlinesListHome = document.getElementById('headlines-list-home');
 
-    // --- エディタ画面側ニュース見出し管理用要素 ---
-    const headlineInputEditor = document.getElementById('headline-input-editor');
-    const headlineAddBtnEditor = document.getElementById('headline-add-btn-editor');
-    const headlineCancelBtnEditor = document.getElementById('headline-cancel-btn-editor');
-    const headlinesListEditor = document.getElementById('headlines-list-editor');
+
 
     // --- モーダル要素 ---
     const deleteModal = document.getElementById('delete-modal');
@@ -348,52 +344,29 @@ document.addEventListener('DOMContentLoaded', () => {
         updateInputCounter(headlineInputHome, document.getElementById('headline-counter-home'));
     });
 
-    headlineInputEditor.addEventListener('input', () => {
-        updateInputCounter(headlineInputEditor, document.getElementById('headline-counter-editor'));
-    });
-
     // --- 見出し用ボタン表示状態切り替え ---
     function updateHeadlineButtonsUI(isEditing) {
         const cancelHome = headlineCancelBtnHome;
-        const cancelEditor = headlineCancelBtnEditor;
-
         const iconHome = document.getElementById('headline-btn-icon-home');
-        const iconEditor = document.getElementById('headline-btn-icon-editor');
-
         const textHome = document.getElementById('headline-btn-text-home');
-        const textEditor = document.getElementById('headline-btn-text-editor');
-
         const btnHome = headlineAddBtnHome;
-        const btnEditor = headlineAddBtnEditor;
 
         if (isEditing) {
             cancelHome.classList.remove('hidden');
             cancelHome.classList.add('flex');
-            cancelEditor.classList.remove('hidden');
-            cancelEditor.classList.add('flex');
 
             iconHome.className = "fa-solid fa-check";
-            iconEditor.className = "fa-solid fa-check";
-
             textHome.textContent = "確定";
-            textEditor.textContent = "確定";
 
             btnHome.className = "bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-sm px-5 rounded-xl flex items-center gap-1.5 transition-all btn-touch shadow-md shadow-indigo-500/10 whitespace-nowrap h-[46px]";
-            btnEditor.className = "bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-sm px-5 rounded-xl flex items-center gap-1.5 transition-all btn-touch shadow-md shadow-indigo-500/10 whitespace-nowrap h-[46px]";
         } else {
             cancelHome.classList.add('hidden');
             cancelHome.classList.remove('flex');
-            cancelEditor.classList.add('hidden');
-            cancelEditor.classList.remove('flex');
 
             iconHome.className = "fa-solid fa-plus";
-            iconEditor.className = "fa-solid fa-plus";
-
             textHome.textContent = "追加";
-            textEditor.textContent = "追加";
 
             btnHome.className = "bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold text-sm px-5 rounded-xl flex items-center gap-1.5 transition-all btn-touch shadow-md shadow-amber-500/10 whitespace-nowrap h-[46px]";
-            btnEditor.className = "bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold text-sm px-5 rounded-xl flex items-center gap-1.5 transition-all btn-touch shadow-md shadow-amber-500/10 whitespace-nowrap h-[46px]";
         }
     }
 
@@ -431,10 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         headlineInputHome.value = '';
-        headlineInputEditor.value = '';
-
         document.getElementById('headline-counter-home').classList.add('hidden');
-        document.getElementById('headline-counter-editor').classList.add('hidden');
 
         renderHeadlines();
     }
@@ -450,25 +420,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // イベントリスナー登録 (エディタ画面側)
-    headlineAddBtnEditor.addEventListener('click', () => saveHeadline(headlineInputEditor));
-    headlineInputEditor.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && !e.isComposing) {
-            if (!e.shiftKey) {
-                e.preventDefault();
-                saveHeadline(headlineInputEditor);
-            }
-        }
-    });
+
 
     // 編集キャンセル処理
     function cancelEdit() {
         editingHeadlineId = null;
         headlineInputHome.value = '';
-        headlineInputEditor.value = '';
 
         document.getElementById('headline-counter-home').classList.add('hidden');
-        document.getElementById('headline-counter-editor').classList.add('hidden');
 
         updateHeadlineButtonsUI(false);
         renderHeadlines();
@@ -476,26 +435,21 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     headlineCancelBtnHome.addEventListener('click', cancelEdit);
-    headlineCancelBtnEditor.addEventListener('click', cancelEdit);
 
     // 1列隙間なし見出しリストの同期レンダリング
     function renderHeadlines() {
         headlinesListHome.innerHTML = '';
-        headlinesListEditor.innerHTML = '';
 
         // 件数バッジを更新
         const count = headlines.length;
         const badgeText = `${count}件`;
         const badgeHome = document.getElementById('headline-count-badge-home');
-        const badgeEditor = document.getElementById('headline-count-badge-editor');
         if (badgeHome) badgeHome.textContent = badgeText;
-        if (badgeEditor) badgeEditor.textContent = badgeText;
 
         const isEmpty = count === 0;
         if (isEmpty) {
             const emptyHtml = `<p class="text-xs text-slate-400 text-center py-6 bg-white">追加された見出しはありません</p>`;
             headlinesListHome.innerHTML = emptyHtml;
-            headlinesListEditor.innerHTML = emptyHtml;
             return;
         }
 
@@ -537,12 +491,6 @@ document.addEventListener('DOMContentLoaded', () => {
             rowHome.className = `flex items-center justify-between py-1.5 px-3 gap-3 transition-colors select-none ${rowBgClass}`;
             rowHome.innerHTML = rowHtml;
             headlinesListHome.appendChild(rowHome);
-
-            // エディタ用
-            const rowEditor = document.createElement('div');
-            rowEditor.className = `flex items-center justify-between py-1.5 px-2 gap-2 transition-colors select-none ${rowBgClass}`;
-            rowEditor.innerHTML = rowHtml;
-            headlinesListEditor.appendChild(rowEditor);
         });
     }
 
@@ -569,10 +517,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 headlineInputHome.value = hl.text;
                 headlineInputHome.focus();
                 updateInputCounter(headlineInputHome, document.getElementById('headline-counter-home'));
-            } else {
-                headlineInputEditor.value = hl.text;
-                headlineInputEditor.focus();
-                updateInputCounter(headlineInputEditor, document.getElementById('headline-counter-editor'));
             }
             renderHeadlines();
             showToast('見出しを入力欄にロードしました');
@@ -584,9 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (editingHeadlineId === id) {
             editingHeadlineId = null;
             headlineInputHome.value = '';
-            headlineInputEditor.value = '';
             document.getElementById('headline-counter-home').classList.add('hidden');
-            document.getElementById('headline-counter-editor').classList.add('hidden');
             updateHeadlineButtonsUI(false);
         }
         headlines = headlines.filter(h => h.id !== id);
