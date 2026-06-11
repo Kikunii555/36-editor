@@ -482,7 +482,15 @@ document.addEventListener('DOMContentLoaded', () => {
         headlinesListHome.innerHTML = '';
         headlinesListEditor.innerHTML = '';
 
-        const isEmpty = headlines.length === 0;
+        // 件数バッジを更新
+        const count = headlines.length;
+        const badgeText = `${count}件`;
+        const badgeHome = document.getElementById('headline-count-badge-home');
+        const badgeEditor = document.getElementById('headline-count-badge-editor');
+        if (badgeHome) badgeHome.textContent = badgeText;
+        if (badgeEditor) badgeEditor.textContent = badgeText;
+
+        const isEmpty = count === 0;
         if (isEmpty) {
             const emptyHtml = `<p class="text-xs text-slate-400 text-center py-6 bg-white">追加された見出しはありません</p>`;
             headlinesListHome.innerHTML = emptyHtml;
