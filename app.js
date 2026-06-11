@@ -264,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (editingHeadlineId !== null) cancelEdit();
 
             renderHeadlines();
+            updateActiveLinePreview();
         }
     }
 
@@ -712,6 +713,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         editor.setSelectionRange(newSelectionStart, newSelectionStart);
+        updateActiveLinePreview();
     }
 
     // --- IME（日本語入力）ハンドラー ---
@@ -1006,6 +1008,55 @@ document.addEventListener('DOMContentLoaded', () => {
             processText();
         }
     });
+
+    // --- アクティブ行プレビューのロジック ---
+    const activeLinePreview = document.getElementById('active-line-preview');
+    const previewLineNum = document.getElementById('preview-line-num');
+    const previewCharCount = document.getElementById('preview-char-count');
+    const previewText = document.getElementById('preview-text');
+
+    function updateActiveLinePreview() {
+        if (!activeLinePreview || !previewLineNum || !previewCharCount || !previewText) return;
+        const text = editor.value;
+        if (!text) {
+            activeLinePreview.classList.add('hidden');
+            return;
+        }
+
+        const selectionStart = editor.selectionStart;
+        const beforeText = text.substring(0, selectionStart);
+        
+        // 改行コードで分割し、カーソルが何行目にあるかを求める（1-indexed）
+        const lines = text.split('\n');
+        const currentLineIndex = beforeText.split('\n').length - 1;
+        const currentLineText = lines[currentLineIndex] || '';
+
+        // 特殊改行コード \u200B を取り除いた、実際のテキストを表示用とする
+        const cleanLineText = currentLineText.replace(/\u200B/g, '');
+
+        // プレビューの更新
+        previewLineNum.textContent = currentLineIndex + 1;
+        
+        // 全角カナ(0.7)、半角英数(0.5)などを考慮した換算文字数を計算
+        const lineCharWidth = getStringWidth(cleanLineText);
+        previewCharCount.textContent = formatCountValue(lineCharWidth);
+
+        // 表示するテキストが空でなければプレビューを表示する
+        if (cleanLineText.trim() !== '') {
+            previewText.textContent = cleanLineText;
+            activeLinePreview.classList.remove('hidden');
+        } else {
+            previewText.innerHTML = '<span class="text-slate-400 font-normal italic">（空の行）</span>';
+            activeLinePreview.classList.remove('hidden');
+        }
+    }
+
+    // イベントの紐付け
+    editor.addEventListener('keyup', updateActiveLinePreview);
+    editor.addEventListener('click', updateActiveLinePreview);
+    editor.addEventListener('select', updateActiveLinePreview);
+    editor.addEventListener('input', updateActiveLinePreview);
+    editor.addEventListener('focus', updateActiveLinePreview);
 
     // 初期化
     loadDataFromStorage();

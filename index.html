@@ -248,6 +248,19 @@
                         placeholder="ここに文章を入力、またはペーストしてください。半角英数は「0.5文字」、全角カタカナは「0.7文字」、その他全角文字は「1文字」として計算され、合計36文字分（全角36文字幅）の長さになるとリアルタイムで自動的に改行されます。"></textarea>
                 </div>
 
+                <!-- カーソル行の常時プレビュー領域 -->
+                <div id="active-line-preview" class="mt-4 p-4 bg-brand-50 border border-brand-100 rounded-xl hidden shrink-0 transition-all">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <span class="text-[10px] sm:text-xs font-bold text-brand-700 uppercase tracking-wide flex items-center gap-1.5">
+                            <i class="fa-solid fa-pen-fancy"></i> 現在書き写す行 (第 <span id="preview-line-num">1</span> 行)
+                        </span>
+                        <span class="text-[10px] sm:text-xs font-medium text-brand-600 bg-white px-2 py-0.5 rounded border border-brand-100 shadow-sm">
+                            <span id="preview-char-count" class="font-bold">0</span> 文字
+                        </span>
+                    </div>
+                    <p id="preview-text" class="text-lg sm:text-xl font-bold text-slate-800 font-mono leading-relaxed select-all break-all"></p>
+                </div>
+
                 <!-- 3列カウンター表示 -->
                 <div class="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-100 shrink-0">
                     <div
