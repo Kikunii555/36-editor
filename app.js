@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', () => {
             iconHome.className = "fa-solid fa-check";
             textHome.textContent = "確定";
 
-            btnHome.className = "bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-sm px-5 rounded-xl flex items-center gap-1.5 transition-all btn-touch shadow-md shadow-indigo-500/10 whitespace-nowrap h-[46px]";
+            btnHome.className = "bg-indigo-600 hover:bg-indigo-700 active:scale-[0.98] text-white font-bold text-xs sm:text-sm px-3 sm:px-5 rounded-xl flex items-center gap-1 sm:gap-1.5 transition-all btn-touch shadow-md shadow-indigo-500/10 whitespace-nowrap h-[46px]";
         } else {
             cancelHome.classList.add('hidden');
             cancelHome.classList.remove('flex');
@@ -585,7 +585,7 @@ document.addEventListener('DOMContentLoaded', () => {
             iconHome.className = "fa-solid fa-plus";
             textHome.textContent = "追加";
 
-            btnHome.className = "bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold text-sm px-5 rounded-xl flex items-center gap-1.5 transition-all btn-touch shadow-md shadow-amber-500/10 whitespace-nowrap h-[46px]";
+            btnHome.className = "bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold text-xs sm:text-sm px-3.5 sm:px-5 rounded-xl flex items-center gap-1 sm:gap-1.5 transition-all btn-touch shadow-md shadow-amber-500/10 whitespace-nowrap h-[46px]";
         }
     }
 
@@ -973,21 +973,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 
                 <div class="border-t border-slate-200/60 pt-2.5 flex items-center justify-between relative">
-                    <div class="flex items-center space-x-3 text-xs text-slate-400">
+                    <div class="flex items-center space-x-1.5 sm:space-x-3 text-[10px] sm:text-xs text-slate-400">
                         <span>元: <b class="text-slate-600">${doc.rawCount}</b></span>
-                        <span>換算: <b class="text-brand-600">${doc.convertedCount}</b></span>
+                        <span><span class="hidden sm:inline">換算</span><span class="inline sm:hidden">換</span>: <b class="text-brand-600">${doc.convertedCount}</b></span>
                         <span>行: <b class="text-emerald-600">${lCount}</b></span>
                     </div>
                     
-                    <div class="flex items-center space-x-1.5 relative">
-                        <button onclick="window.duplicateDoc(event, '${doc.id}')" class="p-2 text-slate-400 hover:text-brand-500 hover:bg-slate-100/50 rounded-lg transition-colors btn-touch" title="複製">
-                            <i class="fa-regular fa-copy text-base"></i>
+                    <div class="flex items-center space-x-0.5 sm:space-x-1.5 relative">
+                        <button onclick="window.duplicateDoc(event, '${doc.id}')" class="p-1.5 sm:p-2 text-slate-400 hover:text-brand-500 hover:bg-slate-100/50 rounded-lg transition-colors btn-touch" title="複製">
+                            <i class="fa-regular fa-copy text-sm sm:text-base"></i>
                         </button>
-                        <button onclick="window.togglePalette(event, '${doc.id}')" class="p-2 text-slate-400 hover:text-brand-500 hover:bg-slate-100/50 rounded-lg transition-colors btn-touch" title="背景色の変更">
-                            <i class="fa-solid fa-palette text-base"></i>
+                        <button onclick="window.togglePalette(event, '${doc.id}')" class="p-1.5 sm:p-2 text-slate-400 hover:text-brand-500 hover:bg-slate-100/50 rounded-lg transition-colors btn-touch" title="背景色の変更">
+                            <i class="fa-solid fa-palette text-sm sm:text-base"></i>
                         </button>
-                        <button onclick="window.openDeleteModal('${doc.id}')" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors btn-touch" title="削除">
-                            <i class="fa-regular fa-trash-can text-base"></i>
+                        <button onclick="window.openDeleteModal('${doc.id}')" class="p-1.5 sm:p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors btn-touch" title="削除">
+                            <i class="fa-regular fa-trash-can text-sm sm:text-base"></i>
                         </button>
 
                         <div id="palette-${doc.id}" class="hidden absolute bottom-12 right-0 bg-white border border-slate-200 rounded-xl p-2.5 shadow-xl z-30 animate-in fade-in slide-in-from-bottom-2 duration-150" style="width:156px">

@@ -50,26 +50,27 @@
 
     <!-- ==================== ヘッダーエリア（共通） ==================== -->
     <header
-        class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shrink-0 shadow-sm z-40">
-        <div class="flex items-center space-x-3">
-            <div class="bg-brand-500 text-white p-2.5 rounded-xl shadow-md shadow-brand-500/20">
-                <i class="fa-solid fa-align-left text-lg"></i>
+        class="bg-white border-b border-slate-200 px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shrink-0 shadow-sm z-40">
+        <div class="flex items-center space-x-2.5 sm:space-x-3">
+            <div class="bg-brand-500 text-white p-2 sm:p-2.5 rounded-xl shadow-md shadow-brand-500/20">
+                <i class="fa-solid fa-align-left text-base sm:text-lg"></i>
             </div>
             <div>
-                <h1 class="text-lg font-bold text-slate-900 tracking-tight">36文字自動改行エディタ</h1>
-                <p id="sub-title" class="text-xs text-slate-500">作成ドキュメント管理</p>
+                <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">36文字自動改行エディタ</h1>
+                <p id="sub-title" class="text-[10px] sm:text-xs text-slate-500">作成ドキュメント管理</p>
             </div>
         </div>
-        <div class="flex items-center gap-3">
-            <div class="flex items-center space-x-2 text-xs bg-slate-100 text-slate-600 px-3 py-1.5 rounded-lg font-medium">
-                <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>
-                リアルタイム処理中
+        <div class="flex items-center gap-2 sm:gap-3">
+            <div class="flex items-center space-x-1.5 text-[10px] sm:text-xs bg-slate-100 text-slate-600 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg font-medium">
+                <span class="inline-block w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="hidden sm:inline">リアルタイム処理中</span>
+                <span class="inline sm:hidden">処理中</span>
             </div>
             <!-- 設定ボタン -->
             <button id="settings-btn"
-                class="h-9 w-9 flex items-center justify-center text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all border border-slate-200 hover:border-brand-200"
+                class="h-8 w-8 sm:h-9 sm:w-9 flex items-center justify-center text-slate-500 hover:text-brand-600 hover:bg-brand-50 rounded-xl transition-all border border-slate-200 hover:border-brand-200"
                 title="文字ウェイト・行幅の設定">
-                <i class="fa-solid fa-gear text-base"></i>
+                <i class="fa-solid fa-gear text-sm sm:text-base"></i>
             </button>
         </div>
     </header>
@@ -91,28 +92,29 @@
             </div>
 
             <!-- 右側ボタンエリア -->
-            <div class="flex items-center gap-3 shrink-0">
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
                 <!-- ロードボタン -->
                 <button id="reload-btn"
-                    class="h-12 bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-600 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border border-slate-200 transition-all btn-touch"
+                    class="h-10 sm:h-12 bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-600 px-3 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 border border-slate-200 transition-all btn-touch"
                     title="クラウドから同期ロード">
-                    <i class="fa-solid fa-cloud-arrow-down text-base"></i>
-                    ロード
+                    <i class="fa-solid fa-cloud-arrow-down text-sm sm:text-base"></i>
+                    <span class="hidden sm:inline">ロード</span>
                 </button>
 
                 <!-- セーブボタン -->
                 <button id="save-all-btn"
-                    class="h-12 bg-brand-50 hover:bg-brand-100 text-brand-600 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border border-brand-200 transition-all btn-touch animate-in fade-in duration-200"
+                    class="h-10 sm:h-12 bg-brand-50 hover:bg-brand-100 text-brand-600 px-3 sm:px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 border border-brand-200 transition-all btn-touch animate-in fade-in duration-200"
                     title="現在の全データをクラウドへ一括保存">
-                    <i class="fa-solid fa-cloud-arrow-up text-base"></i>
-                    セーブ
+                    <i class="fa-solid fa-cloud-arrow-up text-sm sm:text-base"></i>
+                    <span class="hidden sm:inline">セーブ</span>
                 </button>
 
                 <!-- 新規作成ボタン -->
                 <button id="new-doc-btn"
-                    class="h-12 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white px-6 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-500/15 transition-all btn-touch">
-                    <i class="fa-solid fa-plus text-base"></i>
-                    新規ドキュメント
+                    class="h-10 sm:h-12 bg-brand-600 hover:bg-brand-700 active:scale-[0.98] text-white px-3 sm:px-6 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 sm:gap-2 shadow-lg shadow-brand-500/15 transition-all btn-touch">
+                    <i class="fa-solid fa-plus text-sm sm:text-base"></i>
+                    <span class="hidden sm:inline">新規ドキュメント</span>
+                    <span class="inline sm:hidden">新規</span>
                 </button>
             </div>
         </div>
@@ -165,17 +167,17 @@
                     <!-- クイック入力欄 -->
                     <div class="flex gap-2 mb-4">
                         <textarea id="headline-input-home" rows="1"
-                            class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 outline-none text-sm transition-all placeholder:text-slate-400 resize-none h-[46px] overflow-y-auto leading-normal"
+                            class="flex-1 px-3 sm:px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 outline-none text-xs sm:text-sm transition-all placeholder:text-slate-400 resize-none h-[46px] overflow-y-auto leading-normal"
                             placeholder="複数行をペーストすると自動で1行ずつ分解して追加されます）..."></textarea>
 
                         <!-- 編集キャンセルボタン（ホーム用） -->
                         <button id="headline-cancel-btn-home"
-                            class="hidden bg-slate-200 hover:bg-slate-300 active:scale-[0.98] text-slate-700 font-bold text-sm px-4 rounded-xl flex items-center gap-1.5 transition-all btn-touch whitespace-nowrap h-[46px]">
+                            class="hidden bg-slate-200 hover:bg-slate-300 active:scale-[0.98] text-slate-700 font-bold text-xs sm:text-sm px-3 sm:px-4 rounded-xl flex items-center gap-1 sm:gap-1.5 transition-all btn-touch whitespace-nowrap h-[46px]">
                             キャンセル
                         </button>
 
                         <button id="headline-add-btn-home"
-                            class="bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold text-sm px-5 rounded-xl flex items-center gap-1.5 transition-all btn-touch shadow-md shadow-amber-500/10 whitespace-nowrap h-[46px]">
+                            class="bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold text-xs sm:text-sm px-3.5 sm:px-5 rounded-xl flex items-center gap-1 sm:gap-1.5 transition-all btn-touch shadow-md shadow-amber-500/10 whitespace-nowrap h-[46px]">
                             <i class="fa-solid fa-plus" id="headline-btn-icon-home"></i> <span
                                 id="headline-btn-text-home">追加</span>
                         </button>
@@ -199,18 +201,19 @@
     <div id="editor-screen" class="hidden flex-1 flex flex-col overflow-hidden">
 
         <!-- エディタ操作バー -->
-        <div class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between gap-4 shrink-0">
+        <div class="bg-white border-b border-slate-200 px-4 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-3 sm:gap-4 shrink-0">
             <!-- 戻るボタン -->
             <button id="back-btn"
-                class="h-10 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white px-4 rounded-lg font-bold text-sm flex items-center gap-2 shadow-sm transition-all btn-touch">
+                class="h-9 sm:h-10 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white px-2.5 sm:px-4 rounded-lg font-bold text-xs sm:text-sm flex items-center gap-1.5 sm:gap-2 shadow-sm transition-all btn-touch whitespace-nowrap">
                 <i class="fa-solid fa-chevron-left"></i>
-                一覧に戻る
+                <span class="hidden sm:inline">一覧に戻る</span>
+                <span class="inline sm:hidden">戻る</span>
             </button>
 
             <!-- ドキュメントタイトル入力 -->
             <div class="flex-1 max-w-md px-2">
                 <input type="text" id="doc-title-input"
-                    class="w-full text-center font-bold text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-brand-500 py-1 px-2 outline-none transition-all text-sm md:text-base placeholder:font-normal placeholder:text-slate-400"
+                    class="w-full text-center font-bold text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-brand-500 py-1 px-2 outline-none transition-all text-xs sm:text-sm md:text-base placeholder:font-normal placeholder:text-slate-400"
                     placeholder="無題のドキュメント">
             </div>
         </div>
@@ -272,26 +275,35 @@
                 </div>
 
                 <!-- 3列カウンター表示 -->
-                <div class="grid grid-cols-3 gap-3 mt-5 pt-4 border-t border-slate-100 shrink-0">
+                <div class="grid grid-cols-3 gap-2 sm:gap-3 mt-5 pt-4 border-t border-slate-100 shrink-0">
                     <div
-                        class="bg-slate-50 p-3 rounded-xl border border-slate-100 shadow-inner flex flex-col justify-between">
-                        <p class="text-[10px] sm:text-xs text-slate-500 mb-1 truncate">元テキスト (改行除く)</p>
-                        <p class="text-lg sm:text-xl font-extrabold text-slate-900"><span id="raw-count">0</span><span
-                                class="text-[10px] sm:text-xs font-medium text-slate-500 ml-0.5">文字</span></p>
+                        class="bg-slate-50 p-2 sm:p-3 rounded-xl border border-slate-100 shadow-inner flex flex-col justify-between">
+                        <p class="text-[10px] sm:text-xs text-slate-500 mb-1 truncate">
+                            <span class="hidden sm:inline">元テキスト (改行除く)</span>
+                            <span class="inline sm:hidden">元文字数</span>
+                        </p>
+                        <p class="text-base sm:text-xl font-extrabold text-slate-900"><span id="raw-count">0</span><span
+                                class="text-[9px] sm:text-xs font-medium text-slate-500 ml-0.5">文字</span></p>
                     </div>
                     <div
-                        class="bg-brand-50/70 p-3 rounded-xl border border-brand-100/50 shadow-inner flex flex-col justify-between overflow-hidden">
-                        <p class="text-[10px] sm:text-xs text-brand-700 mb-1 font-medium truncate">変換後 (改行含む)</p>
-                        <p class="text-lg sm:text-xl font-extrabold text-brand-700 truncate"><span
+                        class="bg-brand-50/70 p-2 sm:p-3 rounded-xl border border-brand-100/50 shadow-inner flex flex-col justify-between overflow-hidden">
+                        <p class="text-[10px] sm:text-xs text-brand-700 mb-1 font-medium truncate">
+                            <span class="hidden sm:inline">変換後 (改行含む)</span>
+                            <span class="inline sm:hidden">換算文字</span>
+                        </p>
+                        <p class="text-base sm:text-xl font-extrabold text-brand-700 truncate"><span
                                 id="converted-count">0</span><span
-                                class="text-[10px] sm:text-xs font-medium text-brand-500 ml-0.5">文字</span></p>
+                                class="text-[9px] sm:text-xs font-medium text-brand-500 ml-0.5">文字</span></p>
                     </div>
                     <div
-                        class="bg-emerald-50/70 p-3 rounded-xl border border-emerald-100/50 shadow-inner flex flex-col justify-between overflow-hidden">
-                        <p class="text-[10px] sm:text-xs text-emerald-700 mb-1 font-medium truncate">現在の行数</p>
-                        <p class="text-lg sm:text-xl font-extrabold text-emerald-700 truncate"><span
+                        class="bg-emerald-50/70 p-2 sm:p-3 rounded-xl border border-emerald-100/50 shadow-inner flex flex-col justify-between overflow-hidden">
+                        <p class="text-[10px] sm:text-xs text-emerald-700 mb-1 font-medium truncate">
+                            <span class="hidden sm:inline">現在の行数</span>
+                            <span class="inline sm:hidden">行数</span>
+                        </p>
+                        <p class="text-base sm:text-xl font-extrabold text-emerald-700 truncate"><span
                                 id="editor-line-count">0</span><span
-                                class="text-[10px] sm:text-xs font-medium text-emerald-500 ml-0.5">行</span></p>
+                                class="text-[9px] sm:text-xs font-medium text-emerald-500 ml-0.5">行</span></p>
                     </div>
                 </div>
             </div>
