@@ -184,11 +184,11 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadDataFromSupabase() {
         if (!supabase) return false;
         try {
-            // texts の取得
+            // texts の取得 (sort_index 昇順)
             const { data: dbTexts, error: textsError } = await supabase
                 .from('texts')
                 .select('*')
-                .order('updated_at', { ascending: false });
+                .order('sort_index', { ascending: true });
 
             if (textsError) throw textsError;
 
@@ -201,8 +201,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     convertedCount: t.converted_count,
                     lineCount: t.line_count,
                     color: t.color,
+                    sortIndex: t.sort_index !== null && t.sort_index !== undefined ? t.sort_index : 9999,
                     updatedAt: getNowFormatted(new Date(t.updated_at))
                 }));
+                // 順序インデックスに基づく安定ソート
+                texts.sort((a, b) => a.sortIndex - b.sortIndex);
+                // 配列位置に合わせて sortIndex を再セット
+                texts.forEach((t, index) => {
+                    t.sortIndex = index;
+                });
                 saveTextsToStorage(); // ローカルキャッシュを更新
             }
 
@@ -317,7 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // 2. texts（ドキュメント）の全件挿入
             if (texts.length > 0) {
-                const dbTexts = texts.map(t => ({
+                const dbTexts = texts.map((t, index) => ({
                     id: t.id,
                     title: t.title,
                     content: t.content,
@@ -325,6 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     converted_count: t.convertedCount,
                     line_count: t.lineCount,
                     color: t.color,
+                    sort_index: index, // 現在の配列順序をインデックスとしてクラウドに保存
                     updated_at: new Date().toISOString()
                 }));
                 const { error: insertDocsError } = await supabase.from('texts').insert(dbTexts);
@@ -393,7 +401,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 rawCount: rCount, convertedCount: cCount,
                 lineCount: calculatedLineCount,
                 color: "white",
+                sortIndex: 0,
                 updatedAt: getNowFormatted()
+            });
+            // 配列の並びに応じて sortIndex を再配置
+            texts.forEach((t, i) => {
+                t.sortIndex = i;
             });
             activeDocId = newId;
         }
@@ -959,16 +972,35 @@ document.addEventListener('DOMContentLoaded', () => {
             const docColor = doc.color || 'white';
             const theme = COLOR_THEMES[docColor] || COLOR_THEMES.white;
 
+            // フィルタ結果におけるこのカードの位置を取得
+            const docIndex = filtered.findIndex(t => t.id === doc.id);
+            const isFirst = docIndex === 0;
+            const isLast = docIndex === filtered.length - 1;
+
             const card = document.createElement('div');
             card.className = `${theme.card} rounded-2xl border p-4 shadow-sm hover:shadow-md transition-all flex flex-col justify-between h-[135px] list-item-touch relative group`;
 
             card.innerHTML = `
                 <div class="flex-1 cursor-pointer" onclick="window.loadDoc('${doc.id}')">
-                    <div class="flex flex-col">
-                        <h3 class="font-bold text-slate-800 text-base line-clamp-1 group-hover:text-brand-600 transition-colors">${escapeHtml(doc.title)}</h3>
-                        <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
-                            <i class="fa-regular fa-clock"></i> ${doc.updatedAt}
-                        </p>
+                    <div class="flex justify-between items-start gap-2">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-slate-800 text-base line-clamp-1 group-hover:text-brand-600 transition-colors">${escapeHtml(doc.title)}</h3>
+                            <p class="text-[11px] text-slate-400 mt-1 flex items-center gap-1">
+                                <i class="fa-regular fa-clock"></i> ${doc.updatedAt}
+                            </p>
+                        </div>
+                        <div class="flex items-center space-x-0.5 shrink-0 -mt-1 -mr-1">
+                            ${!isFirst ? `
+                                <button onclick="window.moveDoc(event, '${doc.id}', 'up')" class="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-slate-100/50 rounded transition-colors btn-touch" title="前へ移動">
+                                    <i class="fa-solid fa-arrow-left text-xs sm:text-sm"></i>
+                                </button>
+                            ` : ''}
+                            ${!isLast ? `
+                                <button onclick="window.moveDoc(event, '${doc.id}', 'down')" class="p-1.5 text-slate-400 hover:text-brand-600 hover:bg-slate-100/50 rounded transition-colors btn-touch" title="後へ移動">
+                                    <i class="fa-solid fa-arrow-right text-xs sm:text-sm"></i>
+                                </button>
+                            ` : ''}
+                        </div>
                     </div>
                 </div>
                 
@@ -1030,13 +1062,51 @@ document.addEventListener('DOMContentLoaded', () => {
                 convertedCount: doc.convertedCount,
                 lineCount: doc.lineCount,
                 color: doc.color || "white",
+                sortIndex: 0,
                 updatedAt: getNowFormatted()
             };
             texts.unshift(newDoc);
+            // 順序再配置
+            texts.forEach((t, i) => {
+                t.sortIndex = i;
+            });
             saveTextsToStorage();
             showToast('ドキュメントを複製しました');
             renderHome();
         }
+    };
+
+    window.moveDoc = function (event, id, direction) {
+        if (event) event.stopPropagation();
+        const index = texts.findIndex(t => t.id === id);
+        if (index === -1) return;
+
+        if (direction === 'up') {
+            if (index > 0) {
+                const temp = texts[index];
+                texts[index] = texts[index - 1];
+                texts[index - 1] = temp;
+            } else {
+                return;
+            }
+        } else if (direction === 'down') {
+            if (index < texts.length - 1) {
+                const temp = texts[index];
+                texts[index] = texts[index + 1];
+                texts[index + 1] = temp;
+            } else {
+                return;
+            }
+        }
+
+        // 順序再配置
+        texts.forEach((t, i) => {
+            t.sortIndex = i;
+        });
+
+        saveTextsToStorage();
+        renderHome();
+        showToast('順番を変更しました');
     };
 
     window.togglePalette = function (event, id) {
