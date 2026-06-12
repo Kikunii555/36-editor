@@ -1,4 +1,18 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ==================== Supabase 設定 ====================
+    // TODO: ご自身のSupabaseプロジェクトのURLとAnon Keyに書き換えてください。
+    const SUPABASE_URL = 'https://rqghnrfdsgfgszaxumyz.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_XCMxvgCxTbv4VebZj1fYiw_xiBFOk6j';
+
+    let supabase = null;
+    // URLがプレースホルダーでなければSupabaseクライアントを初期化
+    if (typeof window.supabase !== 'undefined' && SUPABASE_URL && !SUPABASE_URL.includes('YOUR_PROJECT_ID')) {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
+    // 共有用の4桁の暗証番号（パスコード）
+    const CORRECT_PIN = '8888';
+
     // --- 画面切り替え要素 ---
     const homeScreen = document.getElementById('home-screen');
     const editorScreen = document.getElementById('editor-screen');
@@ -20,14 +34,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const editorLineCount = document.getElementById('editor-line-count');
 
     const reloadBtn = document.getElementById('reload-btn');
+    const saveAllBtn = document.getElementById('save-all-btn');
 
     // --- ホーム画面側ニュース見出し管理用要素 ---
     const headlineInputHome = document.getElementById('headline-input-home');
     const headlineAddBtnHome = document.getElementById('headline-add-btn-home');
     const headlineCancelBtnHome = document.getElementById('headline-cancel-btn-home');
     const headlinesListHome = document.getElementById('headlines-list-home');
-
-
 
     // --- モーダル要素 ---
     const deleteModal = document.getElementById('delete-modal');
@@ -36,6 +49,92 @@ document.addEventListener('DOMContentLoaded', () => {
     const toast = document.getElementById('toast');
     const toastMessage = document.getElementById('toast-message');
 
+    // --- PIN入力モーダル要素と制御ロジック ---
+    const pinModal = document.getElementById('pin-modal');
+    const pinModalDesc = document.getElementById('pin-modal-desc');
+    const pinErrorMsg = document.getElementById('pin-error-msg');
+    const pinDots = document.querySelectorAll('.pin-dot');
+    const pinKeys = document.querySelectorAll('.pin-key');
+    const pinClearBtn = document.getElementById('pin-clear');
+    const pinCancelBtn = document.getElementById('pin-cancel');
+
+    let pinInputCallback = null;
+    let pinInputCancelCallback = null;
+    let currentEnteredPin = "";
+
+    // 暗証番号入力モーダルを開く関数
+    function requestPin(actionDescription, onSuccess, onCancel) {
+        currentEnteredPin = "";
+        pinInputCallback = onSuccess;
+        pinInputCancelCallback = onCancel;
+        pinModalDesc.textContent = `${actionDescription}するため、4桁の暗証番号を入力してください`;
+        updatePinDots();
+        pinErrorMsg.classList.add('opacity-0');
+        pinModal.classList.remove('hidden');
+        pinModal.classList.add('flex');
+    }
+
+    // ドット表示の更新
+    function updatePinDots() {
+        pinDots.forEach((dot, idx) => {
+            if (idx < currentEnteredPin.length) {
+                dot.classList.remove('bg-transparent', 'border-slate-300');
+                dot.classList.add('bg-brand-600', 'border-brand-600');
+            } else {
+                dot.classList.remove('bg-brand-600', 'border-brand-600');
+                dot.classList.add('bg-transparent', 'border-slate-300');
+            }
+        });
+    }
+
+    // パスコード検証処理
+    function verifyPin() {
+        if (currentEnteredPin === CORRECT_PIN) {
+            pinModal.classList.add('hidden');
+            pinModal.classList.remove('flex');
+            if (pinInputCallback) pinInputCallback();
+        } else {
+            pinErrorMsg.classList.remove('opacity-0');
+            pinDots.forEach(dot => {
+                dot.classList.add('border-rose-500', 'bg-rose-500');
+            });
+            setTimeout(() => {
+                currentEnteredPin = "";
+                updatePinDots();
+                pinDots.forEach(dot => {
+                    dot.classList.remove('border-rose-500', 'bg-rose-500');
+                });
+            }, 500);
+        }
+    }
+
+    // テンキー押下時のハンドラー
+    pinKeys.forEach(key => {
+        key.addEventListener('click', () => {
+            if (currentEnteredPin.length < 4) {
+                currentEnteredPin += key.getAttribute('data-value');
+                updatePinDots();
+                pinErrorMsg.classList.add('opacity-0');
+
+                if (currentEnteredPin.length === 4) {
+                    setTimeout(verifyPin, 150);
+                }
+            }
+        });
+    });
+
+    pinClearBtn.addEventListener('click', () => {
+        currentEnteredPin = "";
+        updatePinDots();
+        pinErrorMsg.classList.add('opacity-0');
+    });
+
+    pinCancelBtn.addEventListener('click', () => {
+        pinModal.classList.add('hidden');
+        pinModal.classList.remove('flex');
+        if (pinInputCancelCallback) pinInputCancelCallback();
+    });
+
     // --- フォントサイズ調整用 ---
     const btnSizeSm = document.getElementById('btn-size-sm');
     const btnSizeMd = document.getElementById('btn-size-md');
@@ -43,25 +142,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- カラーパレットの色のマッピング定義 ---
     const COLOR_THEMES = {
-        white:  { card: "bg-white border-slate-200 hover:border-brand-300" },
-        blue:   { card: "bg-blue-50 border-blue-200 hover:border-blue-400" },
-        green:  { card: "bg-emerald-50 border-emerald-200 hover:border-emerald-400" },
+        white: { card: "bg-white border-slate-200 hover:border-brand-300" },
+        blue: { card: "bg-blue-50 border-blue-200 hover:border-blue-400" },
+        green: { card: "bg-emerald-50 border-emerald-200 hover:border-emerald-400" },
         yellow: { card: "bg-amber-50 border-amber-200 hover:border-amber-400" },
-        rose:   { card: "bg-rose-50 border-rose-200 hover:border-rose-400" },
+        rose: { card: "bg-rose-50 border-rose-200 hover:border-rose-400" },
         purple: { card: "bg-purple-50 border-purple-200 hover:border-purple-400" },
-        sky:    { card: "bg-sky-50 border-sky-200 hover:border-sky-400" },
+        sky: { card: "bg-sky-50 border-sky-200 hover:border-sky-400" },
         orange: { card: "bg-orange-50 border-orange-200 hover:border-orange-400" },
-        teal:   { card: "bg-teal-50 border-teal-200 hover:border-teal-400" },
-        slate:  { card: "bg-slate-100 border-slate-300 hover:border-slate-500" }
+        teal: { card: "bg-teal-50 border-teal-200 hover:border-teal-400" },
+        slate: { card: "bg-slate-100 border-slate-300 hover:border-slate-500" }
     };
 
     // --- デフォルト設定値 ---
     const DEFAULT_CHAR_WEIGHTS = {
-        ascii:       0.5,  // 半角英数字・記号
+        ascii: 0.5,  // 半角英数字・記号
         hankakuKana: 0.5,  // 半角カタカナ
-        katakana:    0.7,  // 全角カタカナ
-        fullwidth:   1.0,  // 漢字・ひらがな・その他
-        lineWidth:   36    // 1行の最大文字幅
+        katakana: 0.7,  // 全角カタカナ
+        fullwidth: 1.0,  // 漢字・ひらがな・その他
+        lineWidth: 36    // 1行の最大文字幅
     };
 
     // localStorageから設定を読み込む
@@ -70,7 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (saved) {
             try {
                 return { ...DEFAULT_CHAR_WEIGHTS, ...JSON.parse(saved) };
-            } catch (e) {}
+            } catch (e) { }
         }
         return { ...DEFAULT_CHAR_WEIGHTS };
     }
@@ -81,11 +180,60 @@ document.addEventListener('DOMContentLoaded', () => {
     let texts = [];
     let headlines = [];
 
-    // ローカルストレージからのデータ復元
-    function loadDataFromStorage() {
+    // Supabaseからデータを非同期ロードする関数
+    async function loadDataFromSupabase() {
+        if (!supabase) return false;
+        try {
+            // texts の取得
+            const { data: dbTexts, error: textsError } = await supabase
+                .from('texts')
+                .select('*')
+                .order('updated_at', { ascending: false });
+
+            if (textsError) throw textsError;
+
+            if (dbTexts) {
+                texts = dbTexts.map(t => ({
+                    id: t.id,
+                    title: t.title,
+                    content: t.content,
+                    rawCount: t.raw_count,
+                    convertedCount: t.converted_count,
+                    lineCount: t.line_count,
+                    color: t.color,
+                    updatedAt: getNowFormatted(new Date(t.updated_at))
+                }));
+                saveTextsToStorage(); // ローカルキャッシュを更新
+            }
+
+            // headlines の取得
+            const { data: dbHeadlines, error: hlError } = await supabase
+                .from('headlines')
+                .select('*')
+                .order('created_at', { ascending: true });
+
+            if (hlError) throw hlError;
+
+            if (dbHeadlines) {
+                headlines = dbHeadlines.map(h => ({
+                    id: h.id,
+                    text: h.text
+                }));
+                saveHeadlinesToStorage(); // ローカルキャッシュを更新
+            }
+            return true;
+        } catch (err) {
+            console.error('Supabaseからのデータ取得に失敗しました。ローカルデータを使用します。', err);
+            return false;
+        }
+    }
+
+    // ローカルストレージおよびSupabaseからのデータ復元
+    async function loadDataFromStorage() {
         const savedTexts = localStorage.getItem('editor_texts');
         const savedHeadlines = localStorage.getItem('editor_headlines');
 
+        // まずローカルデータを即時に表示してUXを確保
         if (savedTexts) {
             texts = JSON.parse(savedTexts);
         } else {
@@ -124,6 +272,15 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
             saveHeadlinesToStorage();
         }
+
+        // Supabaseが有効ならクラウドから最新データを取得・同期
+        if (supabase) {
+            const success = await loadDataFromSupabase();
+            if (success) {
+                renderHome();
+                renderHeadlines();
+            }
+        }
     }
 
     function saveTextsToStorage() {
@@ -143,11 +300,69 @@ document.addEventListener('DOMContentLoaded', () => {
     const AUTO_BREAK_MARKER = '\u200B\n';
     const KINSOKU_CHARS = `、。，．・？！?!゛゜ー〜～）]｝」』】〉》〕»"'ぁぃぅぇぉっゃゅょゎヵヶァィゥェォッャュョヮヵヶ`;
 
-    // --- 共通保存処理（戻るボタン・自動保存共用） ---
-    function saveCurrentDoc() {
+    // --- 一括クラウド保存処理 (Supabase) ---
+    async function saveAllToSupabase() {
+        if (!supabase) {
+            showToast('Supabaseが初期化されていません');
+            return;
+        }
+        
+        const saveIcon = saveAllBtn.querySelector('i');
+        if (saveIcon) saveIcon.classList.add('animate-spin');
+
+        try {
+            // 1. texts（ドキュメント）の全件削除
+            const { error: deleteDocsError } = await supabase.from('texts').delete().neq('id', '');
+            if (deleteDocsError) throw deleteDocsError;
+
+            // 2. texts（ドキュメント）の全件挿入
+            if (texts.length > 0) {
+                const dbTexts = texts.map(t => ({
+                    id: t.id,
+                    title: t.title,
+                    content: t.content,
+                    raw_count: t.rawCount,
+                    converted_count: t.convertedCount,
+                    line_count: t.lineCount,
+                    color: t.color,
+                    updated_at: new Date().toISOString()
+                }));
+                const { error: insertDocsError } = await supabase.from('texts').insert(dbTexts);
+                if (insertDocsError) throw insertDocsError;
+            }
+
+            // 3. headlines（ニュース見出し）の全件削除
+            const { error: deleteHlError } = await supabase.from('headlines').delete().neq('id', '');
+            if (deleteHlError) throw deleteHlError;
+
+            // 4. headlines（ニュース見出し）の全件挿入
+            if (headlines.length > 0) {
+                const dbHeadlines = headlines.map(h => ({
+                    id: h.id,
+                    text: h.text,
+                    created_at: new Date().toISOString()
+                }));
+                const { error: insertHlError } = await supabase.from('headlines').insert(dbHeadlines);
+                if (insertHlError) throw insertHlError;
+            }
+
+            showToast('すべてのデータをクラウドに保存しました');
+        } catch (err) {
+            console.error('クラウド一括保存エラー:', err);
+            showToast('一括保存に失敗しました');
+        } finally {
+            if (saveIcon) saveIcon.classList.remove('animate-spin');
+        }
+    }
+
+    // --- 共通保存処理（ローカルLocalStorageへの保存のみ） ---
+    function saveCurrentDoc(shouldGoHome = false) {
         const rawText = editor.value;
         const textWithoutAutoLineBreaks = rawText.replace(new RegExp(AUTO_BREAK_MARKER, 'g'), '');
-        if (!textWithoutAutoLineBreaks.trim()) return false; // 空なら保存しない
+        if (!textWithoutAutoLineBreaks.trim()) {
+            if (shouldGoHome) switchTo('home');
+            return false; // 空なら保存しない
+        }
 
         let title = docTitleInput.value.trim();
         if (!title) {
@@ -185,6 +400,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         saveTextsToStorage();
         localStorage.removeItem('editor_draft');
+
+        if (shouldGoHome) {
+            switchTo('home');
+        }
         return true;
     }
 
@@ -404,8 +623,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         headlineInputHome.value = '';
-        document.getElementById('headline-counter-home').classList.add('hidden');
-
+        const cntHome = document.getElementById('headline-counter-home');
+        if (cntHome) cntHome.classList.add('hidden');
         renderHeadlines();
     }
 
@@ -528,13 +747,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (editingHeadlineId === id) {
             editingHeadlineId = null;
             headlineInputHome.value = '';
-            document.getElementById('headline-counter-home').classList.add('hidden');
+            const cntHome = document.getElementById('headline-counter-home');
+            if (cntHome) cntHome.classList.add('hidden');
             updateHeadlineButtonsUI(false);
         }
         headlines = headlines.filter(h => h.id !== id);
         saveHeadlinesToStorage();
-        renderHeadlines();
         showToast('見出しを削除しました');
+        renderHeadlines();
     };
 
     // --- 文字サイズ変更ロジック ---
@@ -681,8 +901,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- 日時のフォーマッター ---
-    function getNowFormatted() {
-        const now = new Date();
+    function getNowFormatted(dateObj) {
+        const now = dateObj instanceof Date && !isNaN(dateObj) ? dateObj : new Date();
         const y = now.getFullYear();
         const m = String(now.getMonth() + 1).padStart(2, '0');
         const d = String(now.getDate()).padStart(2, '0');
@@ -706,11 +926,17 @@ document.addEventListener('DOMContentLoaded', () => {
         restoreDraftIfExists();
     });
 
-    // --- 一覧に戻る（自動保存して戻る） ---
+    // --- 一覧に戻る（ローカル保存のみで戻る） ---
     backBtn.addEventListener('click', () => {
         if (autoSaveTimer) clearTimeout(autoSaveTimer);
-        saveCurrentDoc();
-        switchTo('home');
+        // 暗証番号なしでローカル保存してホームに戻る
+        saveCurrentDoc(true, true);
+    });
+
+    // --- セーブボタン（暗証番号を求めてクラウドへ保存） ---
+    saveDocBtn.addEventListener('click', () => {
+        // 暗証番号を求めて保存（エディタ画面を維持）
+        saveCurrentDoc(false, false);
     });
 
     // --- ホーム画面カード一覧レンダリング ---
@@ -804,9 +1030,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (index !== -1) {
             texts[index].color = colorKey;
             saveTextsToStorage();
+            showToast('背景色を変更しました');
+            renderHome();
         }
-        renderHome();
-        showToast('背景色を変更しました');
     };
 
     document.addEventListener('click', () => {
@@ -854,18 +1080,43 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', renderHome);
 
     // 一覧更新ボタンのアクション
-    reloadBtn.addEventListener('click', () => {
+    reloadBtn.addEventListener('click', async () => {
         const icon = reloadBtn.querySelector('i');
         icon.classList.add('animate-spin');
 
-        loadDataFromStorage();
+        if (!supabase) {
+            showToast('Supabaseが初期化されていません（URLやキーの設定をご確認ください）');
+            setTimeout(() => icon.classList.remove('animate-spin'), 500);
+            return;
+        }
+
+        const success = await loadDataFromSupabase();
         renderHome();
         renderHeadlines();
-        showToast('一覧を最新に同期しました');
+
+        if (success) {
+            showToast('クラウドと同期しました');
+        } else {
+            showToast('同期に失敗しました（テーブルが正常に作成されているかご確認ください）');
+        }
 
         setTimeout(() => {
             icon.classList.remove('animate-spin');
         }, 500);
+    });
+
+    // 一括セーブボタンのアクション（暗証番号要求）
+    saveAllBtn.addEventListener('click', () => {
+        if (!supabase) {
+            showToast('Supabaseが初期化されていません（URLやキーの設定をご確認ください）');
+            return;
+        }
+
+        requestPin("すべてのデータを保存", async () => {
+            await saveAllToSupabase();
+        }, () => {
+            showToast('保存をキャンセルしました');
+        });
     });
 
     function escapeHtml(string) {
@@ -877,25 +1128,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==================== 設定モーダル ====================
-    const settingsModal   = document.getElementById('settings-modal');
-    const settingsBtn     = document.getElementById('settings-btn');
-    const settingsCloseBtn= document.getElementById('settings-close-btn');
+    const settingsModal = document.getElementById('settings-modal');
+    const settingsBtn = document.getElementById('settings-btn');
+    const settingsCloseBtn = document.getElementById('settings-close-btn');
     const settingsSaveBtn = document.getElementById('settings-save-btn');
-    const settingsResetBtn= document.getElementById('settings-reset-btn');
+    const settingsResetBtn = document.getElementById('settings-reset-btn');
 
-    const inputLineWidth    = document.getElementById('setting-line-width');
-    const inputAscii        = document.getElementById('setting-weight-ascii');
-    const inputHankakuKana  = document.getElementById('setting-weight-hankaku-kana');
-    const inputKatakana     = document.getElementById('setting-weight-katakana');
-    const inputFullwidth    = document.getElementById('setting-weight-fullwidth');
+    const inputLineWidth = document.getElementById('setting-line-width');
+    const inputAscii = document.getElementById('setting-weight-ascii');
+    const inputHankakuKana = document.getElementById('setting-weight-hankaku-kana');
+    const inputKatakana = document.getElementById('setting-weight-katakana');
+    const inputFullwidth = document.getElementById('setting-weight-fullwidth');
 
     // モーダルを開く（現在の設定値をフォームに反映）
     function openSettingsModal() {
-        inputLineWidth.value   = CHAR_WEIGHTS.lineWidth;
-        inputAscii.value       = CHAR_WEIGHTS.ascii;
+        inputLineWidth.value = CHAR_WEIGHTS.lineWidth;
+        inputAscii.value = CHAR_WEIGHTS.ascii;
         inputHankakuKana.value = CHAR_WEIGHTS.hankakuKana;
-        inputKatakana.value    = CHAR_WEIGHTS.katakana;
-        inputFullwidth.value   = CHAR_WEIGHTS.fullwidth;
+        inputKatakana.value = CHAR_WEIGHTS.katakana;
+        inputFullwidth.value = CHAR_WEIGHTS.fullwidth;
 
         settingsModal.classList.remove('hidden');
         settingsModal.classList.add('flex');
@@ -967,7 +1218,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const selectionStart = editor.selectionStart;
         const beforeText = text.substring(0, selectionStart);
-        
+
         // 改行コードで分割し、カーソルが何行目にあるかを求める（1-indexed）
         const lines = text.split('\n');
         const currentLineIndex = beforeText.split('\n').length - 1;
@@ -978,7 +1229,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // プレビューの更新
         previewLineNum.textContent = currentLineIndex + 1;
-        
+
         // 全角カナ(0.7)、半角英数(0.5)などを考慮した換算文字数を計算
         const lineCharWidth = getStringWidth(cleanLineText);
         previewCharCount.textContent = formatCountValue(lineCharWidth);

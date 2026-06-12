@@ -37,6 +37,9 @@
         }
     </script>
 
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <!-- アイコン用のフォント読み込み -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
@@ -89,12 +92,20 @@
 
             <!-- 右側ボタンエリア -->
             <div class="flex items-center gap-3 shrink-0">
-                <!-- 更新ボタン -->
+                <!-- ロードボタン -->
                 <button id="reload-btn"
                     class="h-12 bg-slate-100 hover:bg-slate-200 active:scale-[0.98] text-slate-600 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border border-slate-200 transition-all btn-touch"
-                    title="一覧を更新">
-                    <i class="fa-solid fa-rotate-right text-base"></i>
-                    更新
+                    title="クラウドから同期ロード">
+                    <i class="fa-solid fa-cloud-arrow-down text-base"></i>
+                    ロード
+                </button>
+
+                <!-- セーブボタン -->
+                <button id="save-all-btn"
+                    class="h-12 bg-brand-50 hover:bg-brand-100 text-brand-600 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 border border-brand-200 transition-all btn-touch animate-in fade-in duration-200"
+                    title="現在の全データをクラウドへ一括保存">
+                    <i class="fa-solid fa-cloud-arrow-up text-base"></i>
+                    セーブ
                 </button>
 
                 <!-- 新規作成ボタン -->
@@ -202,7 +213,6 @@
                     class="w-full text-center font-bold text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-brand-500 py-1 px-2 outline-none transition-all text-sm md:text-base placeholder:font-normal placeholder:text-slate-400"
                     placeholder="無題のドキュメント">
             </div>
-
         </div>
 
         <!-- 執筆エリア（全体スクロール可能） -->
@@ -311,6 +321,53 @@
                     class="flex-1 h-12 bg-rose-600 hover:bg-rose-700 active:scale-[0.98] text-white font-bold rounded-xl text-sm transition-all btn-touch">
                     削除する
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 暗証番号（パスコード）入力モーダル ==================== -->
+    <div id="pin-modal"
+        class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm items-center justify-center z-[60] p-4">
+        <div
+            class="bg-white/95 backdrop-blur-md rounded-3xl max-w-[320px] w-full p-6 shadow-2xl border border-slate-200/50 flex flex-col items-center animate-in fade-in zoom-in-95 duration-150 select-none">
+            <!-- 鍵アイコン -->
+            <div class="w-12 h-12 bg-brand-50 text-brand-600 rounded-full flex items-center justify-center mb-4 text-xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            
+            <h3 class="text-base font-bold text-slate-800 tracking-tight">暗証番号入力</h3>
+            <p id="pin-modal-desc" class="text-xs text-slate-400 mt-1 text-center font-medium">データを保存するため、4桁の暗証番号を入力してください</p>
+            
+            <!-- パスコードドットインジケーター -->
+            <div class="flex space-x-4 my-6">
+                <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-transparent transition-all duration-150"></div>
+                <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-transparent transition-all duration-150"></div>
+                <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-transparent transition-all duration-150"></div>
+                <div class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-transparent transition-all duration-150"></div>
+            </div>
+            
+            <!-- エラー表示領域 -->
+            <div id="pin-error-msg" class="text-xs font-bold text-rose-500 mb-4 h-4 opacity-0 transition-opacity duration-150">暗証番号が一致しません</div>
+
+            <!-- キーパッド (3x4) -->
+            <div class="grid grid-cols-3 gap-4 w-full justify-items-center">
+                <button type="button" class="pin-key w-14 h-14 rounded-full bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold text-xl flex items-center justify-center border border-slate-200/50 transition-all btn-touch" data-value="1">1</button>
+                <button type="button" class="pin-key w-14 h-14 rounded-full bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold text-xl flex items-center justify-center border border-slate-200/50 transition-all btn-touch" data-value="2">2</button>
+                <button type="button" class="pin-key w-14 h-14 rounded-full bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold text-xl flex items-center justify-center border border-slate-200/50 transition-all btn-touch" data-value="3">3</button>
+                
+                <button type="button" class="pin-key w-14 h-14 rounded-full bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold text-xl flex items-center justify-center border border-slate-200/50 transition-all btn-touch" data-value="4">4</button>
+                <button type="button" class="pin-key w-14 h-14 rounded-full bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold text-xl flex items-center justify-center border border-slate-200/50 transition-all btn-touch" data-value="5">5</button>
+                <button type="button" class="pin-key w-14 h-14 rounded-full bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold text-xl flex items-center justify-center border border-slate-200/50 transition-all btn-touch" data-value="6">6</button>
+                
+                <button type="button" class="pin-key w-14 h-14 rounded-full bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold text-xl flex items-center justify-center border border-slate-200/50 transition-all btn-touch" data-value="7">7</button>
+                <button type="button" class="pin-key w-14 h-14 rounded-full bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold text-xl flex items-center justify-center border border-slate-200/50 transition-all btn-touch" data-value="8">8</button>
+                <button type="button" class="pin-key w-14 h-14 rounded-full bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold text-xl flex items-center justify-center border border-slate-200/50 transition-all btn-touch" data-value="9">9</button>
+                
+                <!-- クリア(C) -->
+                <button type="button" id="pin-clear" class="w-14 h-14 rounded-full bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-500 font-bold text-sm flex items-center justify-center transition-all btn-touch" title="クリア">クリア</button>
+                <button type="button" class="pin-key w-14 h-14 rounded-full bg-slate-50 hover:bg-slate-100 active:scale-95 text-slate-800 font-extrabold text-xl flex items-center justify-center border border-slate-200/50 transition-all btn-touch" data-value="0">0</button>
+                <!-- キャンセル(閉じる) -->
+                <button type="button" id="pin-cancel" class="w-14 h-14 rounded-full bg-rose-50 hover:bg-rose-100 active:scale-95 text-rose-500 font-bold text-sm flex items-center justify-center transition-all btn-touch" title="キャンセル">閉じる</button>
             </div>
         </div>
     </div>
