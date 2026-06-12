@@ -1283,6 +1283,19 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.addEventListener('input', updateActiveLinePreview);
     editor.addEventListener('focus', updateActiveLinePreview);
 
+    // Service Worker の登録 (PWAインストール対応)
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(reg => {
+                    console.log('Service Worker registered successfully:', reg);
+                })
+                .catch(err => {
+                    console.error('Service Worker registration failed:', err);
+                });
+        });
+    }
+
     // 初期化
     loadDataFromStorage();
     renderHome();
