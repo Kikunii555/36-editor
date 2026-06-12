@@ -933,11 +933,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveCurrentDoc(true, true);
     });
 
-    // --- セーブボタン（暗証番号を求めてクラウドへ保存） ---
-    saveDocBtn.addEventListener('click', () => {
-        // 暗証番号を求めて保存（エディタ画面を維持）
-        saveCurrentDoc(false, false);
-    });
+
 
     // --- ホーム画面カード一覧レンダリング ---
     function renderHome() {
