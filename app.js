@@ -143,7 +143,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- カラーパレットの色のマッピング定義 ---
     const COLOR_THEMES = {
         white: { card: "bg-white border-slate-200 hover:border-brand-300" },
-        blue: { card: "bg-blue-50 border-blue-200 hover:border-blue-400" },
+        blue: { card: "bg-indigo-50 border-indigo-200 hover:border-indigo-400" },
         green: { card: "bg-emerald-50 border-emerald-200 hover:border-emerald-400" },
         yellow: { card: "bg-amber-50 border-amber-200 hover:border-amber-400" },
         rose: { card: "bg-rose-50 border-rose-200 hover:border-rose-400" },
@@ -980,6 +980,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     
                     <div class="flex items-center space-x-1.5 relative">
+                        <button onclick="window.duplicateDoc(event, '${doc.id}')" class="p-2 text-slate-400 hover:text-brand-500 hover:bg-slate-100/50 rounded-lg transition-colors btn-touch" title="複製">
+                            <i class="fa-regular fa-copy text-base"></i>
+                        </button>
                         <button onclick="window.togglePalette(event, '${doc.id}')" class="p-2 text-slate-400 hover:text-brand-500 hover:bg-slate-100/50 rounded-lg transition-colors btn-touch" title="背景色の変更">
                             <i class="fa-solid fa-palette text-base"></i>
                         </button>
@@ -990,7 +993,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <div id="palette-${doc.id}" class="hidden absolute bottom-12 right-0 bg-white border border-slate-200 rounded-xl p-2.5 shadow-xl z-30 animate-in fade-in slide-in-from-bottom-2 duration-150" style="width:156px">
                             <div class="grid grid-cols-5 gap-1.5">
                                 <button onclick="window.changeDocColor(event, '${doc.id}', 'white')"  class="w-7 h-7 rounded-full border-2 border-slate-300  bg-white          hover:scale-110 transition-transform shrink-0" title="ホワイト"></button>
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'blue')"   class="w-7 h-7 rounded-full border-2 border-blue-300   bg-blue-100       hover:scale-110 transition-transform shrink-0" title="ブルー"></button>
+                                <button onclick="window.changeDocColor(event, '${doc.id}', 'blue')"   class="w-7 h-7 rounded-full border-2 border-indigo-300   bg-indigo-100       hover:scale-110 transition-transform shrink-0" title="インディゴ"></button>
                                 <button onclick="window.changeDocColor(event, '${doc.id}', 'green')"  class="w-7 h-7 rounded-full border-2 border-emerald-300 bg-emerald-100    hover:scale-110 transition-transform shrink-0" title="グリーン"></button>
                                 <button onclick="window.changeDocColor(event, '${doc.id}', 'yellow')" class="w-7 h-7 rounded-full border-2 border-amber-300   bg-amber-100      hover:scale-110 transition-transform shrink-0" title="イエロー"></button>
                                 <button onclick="window.changeDocColor(event, '${doc.id}', 'rose')"   class="w-7 h-7 rounded-full border-2 border-rose-300    bg-rose-100       hover:scale-110 transition-transform shrink-0" title="ローズ"></button>
@@ -1007,6 +1010,34 @@ document.addEventListener('DOMContentLoaded', () => {
             docsGrid.appendChild(card);
         });
     }
+
+    window.duplicateDoc = function (event, id) {
+        if (event) event.stopPropagation();
+        const doc = texts.find(t => t.id === id);
+        if (doc) {
+            const newId = 'doc-' + Date.now();
+            let newTitle = doc.title;
+            if (!newTitle.endsWith(' - コピー')) {
+                newTitle = newTitle + ' - コピー';
+            } else {
+                newTitle = newTitle + ' - コピー';
+            }
+            const newDoc = {
+                id: newId,
+                title: newTitle,
+                content: doc.content,
+                rawCount: doc.rawCount,
+                convertedCount: doc.convertedCount,
+                lineCount: doc.lineCount,
+                color: doc.color || "white",
+                updatedAt: getNowFormatted()
+            };
+            texts.unshift(newDoc);
+            saveTextsToStorage();
+            showToast('ドキュメントを複製しました');
+            renderHome();
+        }
+    };
 
     window.togglePalette = function (event, id) {
         event.stopPropagation();
@@ -1076,29 +1107,34 @@ document.addEventListener('DOMContentLoaded', () => {
     searchInput.addEventListener('input', renderHome);
 
     // 一覧更新ボタンのアクション
-    reloadBtn.addEventListener('click', async () => {
-        const icon = reloadBtn.querySelector('i');
-        icon.classList.add('animate-spin');
-
+    reloadBtn.addEventListener('click', () => {
         if (!supabase) {
             showToast('Supabaseが初期化されていません（URLやキーの設定をご確認ください）');
-            setTimeout(() => icon.classList.remove('animate-spin'), 500);
             return;
         }
 
-        const success = await loadDataFromSupabase();
-        renderHome();
-        renderHeadlines();
+        requestPin("データをロード", async () => {
+            const icon = reloadBtn.querySelector('i');
+            if (icon) icon.classList.add('animate-spin');
 
-        if (success) {
-            showToast('クラウドと同期しました');
-        } else {
-            showToast('同期に失敗しました（テーブルが正常に作成されているかご確認ください）');
-        }
+            const success = await loadDataFromSupabase();
+            renderHome();
+            renderHeadlines();
 
-        setTimeout(() => {
-            icon.classList.remove('animate-spin');
-        }, 500);
+            if (success) {
+                showToast('クラウドと同期しました');
+            } else {
+                showToast('同期に失敗しました（テーブルが正常に作成されているかご確認ください）');
+            }
+
+            if (icon) {
+                setTimeout(() => {
+                    icon.classList.remove('animate-spin');
+                }, 500);
+            }
+        }, () => {
+            showToast('ロードをキャンセルしました');
+        });
     });
 
     // 一括セーブボタンのアクション（暗証番号要求）
