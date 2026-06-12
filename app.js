@@ -184,14 +184,24 @@ document.addEventListener('DOMContentLoaded', () => {
     async function loadDataFromSupabase() {
         if (!supabase) return false;
         try {
-            // texts の取得 (sort_index 昇順)
-            const { data: dbTexts, error: textsError } = await supabase
+            // texts の取得を試みる。まず sort_index 順での取得を試みる
+            let dbTextsResult = await supabase
                 .from('texts')
                 .select('*')
                 .order('sort_index', { ascending: true });
 
-            if (textsError) throw textsError;
+            // もし sort_index カラムが存在しないことによるエラーの場合、updated_at 順でフォールバック
+            if (dbTextsResult.error && (dbTextsResult.error.message.includes('sort_index') || dbTextsResult.error.code === '42703')) {
+                console.warn('sort_index カラムが存在しないため、updated_at 順でフォールバックします。SQL "ALTER TABLE public.texts ADD COLUMN sort_index integer;" の実行をご検討ください。');
+                dbTextsResult = await supabase
+                    .from('texts')
+                    .select('*')
+                    .order('updated_at', { ascending: false });
+            }
 
+            if (dbTextsResult.error) throw dbTextsResult.error;
+
+            const dbTexts = dbTextsResult.data;
             if (dbTexts) {
                 texts = dbTexts.map(t => ({
                     id: t.id,
@@ -336,7 +346,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     updated_at: new Date().toISOString()
                 }));
                 const { error: insertDocsError } = await supabase.from('texts').insert(dbTexts);
-                if (insertDocsError) throw insertDocsError;
+                
+                // もし sort_index カラムが存在しないことによるエラーの場合、sort_index を除外して再試行
+                if (insertDocsError && (insertDocsError.message.includes('sort_index') || insertDocsError.code === '42703')) {
+                    console.warn('sort_index カラムが存在しないため、sort_index を除外して保存を再試行します。');
+                    const fallbackTexts = texts.map(t => ({
+                        id: t.id,
+                        title: t.title,
+                        content: t.content,
+                        raw_count: t.rawCount,
+                        converted_count: t.convertedCount,
+                        line_count: t.lineCount,
+                        color: t.color,
+                        updated_at: new Date().toISOString()
+                    }));
+                    const { error: fallbackError } = await supabase.from('texts').insert(fallbackTexts);
+                    if (fallbackError) throw fallbackError;
+                } else if (insertDocsError) {
+                    throw insertDocsError;
+                }
             }
 
             // 3. headlines（ニュース見出し）の全件削除
