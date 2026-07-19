@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // ==================== Supabase 設定 ====================
-    // TODO: ご自身のSupabaseプロジェクトのURLとAnon Keyに書き換えてください。
-    const SUPABASE_URL = 'https://rqghnrfdsgfgszaxumyz.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_XCMxvgCxTbv4VebZj1fYiw_xiBFOk6j';
+    // Supabase連携無効化（ローカル単体保存モード）
+    const SUPABASE_URL = '';
+    const SUPABASE_ANON_KEY = '';
 
     let supabase = null;
     // URLがプレースホルダーでなければSupabaseクライアントを初期化
