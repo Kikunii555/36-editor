@@ -166,19 +166,19 @@
                     </div>
 
                     <!-- クイック入力欄 -->
-                    <div class="flex gap-2 mb-4">
-                        <textarea id="headline-input-home" rows="1"
-                            class="flex-1 px-3 sm:px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 outline-none text-xs sm:text-sm transition-all placeholder:text-slate-400 resize-none h-[46px] overflow-y-auto leading-normal"
-                            placeholder="複数行をペーストすると自動で1行ずつ分解して追加されます）..."></textarea>
+                    <div class="flex gap-2 mb-4 items-start">
+                        <textarea id="headline-input-home" rows="3"
+                            class="flex-1 px-3 sm:px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:border-amber-500 focus:ring-2 focus:ring-amber-500/10 outline-none text-xs sm:text-sm transition-all placeholder:text-slate-400 min-h-[96px] overflow-y-auto leading-normal"
+                            placeholder="複数行をペーストすると自動で1行ずつ分解して追加されます..."></textarea>
 
                         <!-- 編集キャンセルボタン（ホーム用） -->
                         <button id="headline-cancel-btn-home"
-                            class="hidden bg-slate-200 hover:bg-slate-300 active:scale-[0.98] text-slate-700 font-bold text-xs sm:text-sm px-3 sm:px-4 rounded-xl flex items-center gap-1 sm:gap-1.5 transition-all btn-touch whitespace-nowrap h-[46px]">
+                            class="hidden bg-slate-200 hover:bg-slate-300 active:scale-[0.98] text-slate-700 font-bold text-xs sm:text-sm px-3 sm:px-4 rounded-xl flex items-center gap-1 sm:gap-1.5 transition-all btn-touch whitespace-nowrap h-[96px]">
                             キャンセル
                         </button>
 
                         <button id="headline-add-btn-home"
-                            class="bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold text-xs sm:text-sm px-3.5 sm:px-5 rounded-xl flex items-center gap-1 sm:gap-1.5 transition-all btn-touch shadow-md shadow-amber-500/10 whitespace-nowrap h-[46px]">
+                            class="bg-amber-500 hover:bg-amber-600 active:scale-[0.98] text-white font-bold text-xs sm:text-sm px-3.5 sm:px-5 rounded-xl flex items-center gap-1 sm:gap-1.5 transition-all btn-touch shadow-md shadow-amber-500/10 whitespace-nowrap h-[96px]">
                             <i class="fa-solid fa-plus" id="headline-btn-icon-home"></i> <span
                                 id="headline-btn-text-home">追加</span>
                         </button>
@@ -212,7 +212,7 @@
             </button>
 
             <!-- ドキュメントタイトル入力 -->
-            <div class="flex-1 max-w-md px-2">
+            <div class="flex-1 max-w-3xl px-2">
                 <input type="text" id="doc-title-input"
                     class="w-full text-center font-bold text-slate-800 border-b border-transparent hover:border-slate-200 focus:border-brand-500 py-1 px-2 outline-none transition-all text-xs sm:text-sm md:text-base placeholder:font-normal placeholder:text-slate-400"
                     placeholder="無題のドキュメント">
@@ -242,9 +242,9 @@
                             <button id="btn-size-sm"
                                 class="px-3 py-1 text-xs rounded-lg transition-all font-semibold hover:bg-white/50">小</button>
                             <button id="btn-size-md"
-                                class="px-3 py-1 text-xs rounded-lg transition-all font-semibold bg-white shadow-sm text-brand-600">中</button>
+                                class="px-3 py-1 text-xs rounded-lg transition-all font-semibold hover:bg-white/50">中</button>
                             <button id="btn-size-lg"
-                                class="px-3 py-1 text-xs rounded-lg transition-all font-semibold hover:bg-white/50">大</button>
+                                class="px-3 py-1 text-xs rounded-lg transition-all font-semibold bg-white shadow-sm text-brand-600">大</button>
                         </div>
 
                         <button id="clear-main-btn"
@@ -258,7 +258,7 @@
                 <div class="w-full h-72 relative shrink-0">
                     <textarea id="editor"
                         class="w-full h-full p-5 border border-slate-200 rounded-xl bg-slate-50/50 focus:bg-white focus:border-brand-500 focus:ring-2 focus:ring-brand-500/10 outline-none font-mono leading-relaxed resize-none transition-all placeholder:text-slate-400 overflow-y-auto"
-                        style="font-size: 16px;"
+                        style="font-size: 18px;"
                         placeholder="ここに文章を入力、またはペーストしてください。半角英数は「0.5文字」、全角カタカナは「0.7文字」、その他全角文字は「1文字」として計算され、合計36文字分（全角36文字幅）の長さになるとリアルタイムで自動的に改行されます。"></textarea>
                 </div>
 

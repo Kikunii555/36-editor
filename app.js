@@ -403,8 +403,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let title = docTitleInput.value.trim();
         if (!title) {
             const cleanText = textWithoutAutoLineBreaks.replace(/\n/g, ' ');
-            title = cleanText.substring(0, 15) || '無題のドキュメント';
-            if (cleanText.length > 15) title += '...';
+            title = cleanText.substring(0, 35) || '無題のドキュメント';
+            if (cleanText.length > 35) title += '...';
         }
 
         const rCount = parseFloat(rawCount.textContent);
@@ -811,6 +811,9 @@ document.addEventListener('DOMContentLoaded', () => {
     btnSizeMd.addEventListener('click', () => changeFontSize('16px', btnSizeMd));
     btnSizeLg.addEventListener('click', () => changeFontSize('18px', btnSizeLg));
 
+    // 初期デフォルト文字サイズを「大（18px）」に設定
+    changeFontSize('18px', btnSizeLg);
+
     // --- リアルタイムテキスト変換＆改行 ---
     function processText() {
         if (isComposing) return;
@@ -1050,18 +1053,16 @@ document.addEventListener('DOMContentLoaded', () => {
                             <i class="fa-regular fa-trash-can text-sm sm:text-base"></i>
                         </button>
 
-                        <div id="palette-${doc.id}" class="hidden absolute bottom-12 right-0 bg-white border border-slate-200 rounded-xl p-2.5 shadow-xl z-30 animate-in fade-in slide-in-from-bottom-2 duration-150" style="width:156px">
-                            <div class="grid grid-cols-5 gap-1.5">
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'white')"  class="w-7 h-7 rounded-full border-2 border-slate-300  bg-white          hover:scale-110 transition-transform shrink-0" title="ホワイト"></button>
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'blue')"   class="w-7 h-7 rounded-full border-2 border-indigo-300   bg-indigo-100       hover:scale-110 transition-transform shrink-0" title="インディゴ"></button>
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'green')"  class="w-7 h-7 rounded-full border-2 border-emerald-300 bg-emerald-100    hover:scale-110 transition-transform shrink-0" title="グリーン"></button>
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'yellow')" class="w-7 h-7 rounded-full border-2 border-amber-300   bg-amber-100      hover:scale-110 transition-transform shrink-0" title="イエロー"></button>
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'rose')"   class="w-7 h-7 rounded-full border-2 border-rose-300    bg-rose-100       hover:scale-110 transition-transform shrink-0" title="ローズ"></button>
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'purple')" class="w-7 h-7 rounded-full border-2 border-purple-300   bg-purple-100     hover:scale-110 transition-transform shrink-0" title="パープル"></button>
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'sky')"    class="w-7 h-7 rounded-full border-2 border-sky-300     bg-sky-100        hover:scale-110 transition-transform shrink-0" title="スカイ"></button>
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'orange')" class="w-7 h-7 rounded-full border-2 border-orange-300   bg-orange-100     hover:scale-110 transition-transform shrink-0" title="オレンジ"></button>
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'teal')"   class="w-7 h-7 rounded-full border-2 border-teal-300     bg-teal-100       hover:scale-110 transition-transform shrink-0" title="ティール"></button>
-                                <button onclick="window.changeDocColor(event, '${doc.id}', 'slate')"  class="w-7 h-7 rounded-full border-2 border-slate-400    bg-slate-200      hover:scale-110 transition-transform shrink-0" title="グレー"></button>
+                        <div id="palette-${doc.id}" class="hidden absolute bottom-12 right-0 bg-white border border-slate-200 rounded-xl p-2.5 shadow-xl z-30 animate-in fade-in slide-in-from-bottom-2 duration-150" style="width:150px">
+                            <div class="grid grid-cols-4 gap-1.5">
+                                <button onclick="window.changeDocColor(event, '${doc.id}', 'white')"  class="w-7 h-7 rounded-full border-2 border-slate-300  bg-white          hover:scale-110 transition-transform shrink-0 flex items-center justify-center" title="ホワイト"></button>
+                                <button onclick="window.changeDocColor(event, '${doc.id}', 'orange')" class="w-7 h-7 rounded-full border-2 border-orange-300 bg-orange-100     hover:scale-110 transition-transform shrink-0 flex items-center justify-center text-[8px] font-bold text-orange-900 leading-none" title="オレンジ（日経）">日経</button>
+                                <button onclick="window.changeDocColor(event, '${doc.id}', 'blue')"   class="w-7 h-7 rounded-full border-2 border-indigo-300   bg-indigo-100       hover:scale-110 transition-transform shrink-0 flex items-center justify-center text-[8px] font-bold text-indigo-900 leading-none" title="ブルー（米国）">米国</button>
+                                <button onclick="window.changeDocColor(event, '${doc.id}', 'purple')" class="w-7 h-7 rounded-full border-2 border-purple-300   bg-purple-100     hover:scale-110 transition-transform shrink-0 flex items-center justify-center" title="パープル"></button>
+                                <button onclick="window.changeDocColor(event, '${doc.id}', 'rose')"   class="w-7 h-7 rounded-full border-2 border-rose-300    bg-rose-100       hover:scale-110 transition-transform shrink-0 flex items-center justify-center text-[8px] font-bold text-rose-900 leading-none" title="ローズ（為替）">為替</button>
+                                <button onclick="window.changeDocColor(event, '${doc.id}', 'yellow')" class="w-7 h-7 rounded-full border-2 border-amber-300   bg-amber-100      hover:scale-110 transition-transform shrink-0 flex items-center justify-center text-[8px] font-bold text-amber-900 leading-none" title="イエロー（週日）">週日</button>
+                                <button onclick="window.changeDocColor(event, '${doc.id}', 'green')"  class="w-7 h-7 rounded-full border-2 border-emerald-300 bg-emerald-100    hover:scale-110 transition-transform shrink-0 flex items-center justify-center text-[8px] font-bold text-emerald-900 leading-none" title="グリーン（週米）">週米</button>
+                                <button onclick="window.changeDocColor(event, '${doc.id}', 'slate')"  class="w-7 h-7 rounded-full border-2 border-slate-400    bg-slate-200      hover:scale-110 transition-transform shrink-0 flex items-center justify-center" title="グレー"></button>
                             </div>
                         </div>
                     </div>
